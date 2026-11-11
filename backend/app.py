@@ -19,8 +19,12 @@ def create_app():
     # Configuration
     database_url = os.environ.get('DATABASE_URL')
     if not database_url:
-        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'urcure.db')
+        if os.environ.get('VERCEL'):
+            db_path = '/tmp/urcure.db'
+        else:
+            db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'urcure.db')
         database_url = f'sqlite:///{db_path}'
+
 
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -82,7 +86,10 @@ def create_app():
 
     return app
 
+# WSGI callable for Vercel / Production
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+
