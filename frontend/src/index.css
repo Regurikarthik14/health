@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #050505;
+    --bg-secondary: #0B0B0B;
+    --bg-card: #111111;
+    --glass-panel: rgba(255, 255, 255, 0.035);
+    --glass-panel-hover: rgba(255, 255, 255, 0.06);
+    --border-color: #292929;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-highlight: #C0C0C0;
+    --text-primary: #F5F5F5;
+    --text-secondary: #929292;
+    --text-muted: #777777;
+  }
+
+  body {
+    background-color: #050505;
+    color: #F5F5F5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    min-height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #050505;
+    color: #F5F5F5;
+  }
+
+  /* Custom scrollbar in pure obsidian monochrome */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #050505;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #292929;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555555;
+  }
+}
+
+/* Obsidian Glassmorphism Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid #292929;
+}
+
+.glass-panel-subtle {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-panel-hover:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(192, 192, 192, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card {
+  background: #111111;
+  border: 1px solid #292929;
+  border-radius: 0.75rem;
+}
+
+.glass-card:hover {
+  border-color: rgba(192, 192, 192, 0.3);
+}
+
+.chrome-border {
+  border-color: rgba(192, 192, 192, 0.4);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.03);
+}
+
+.obsidian-glow {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.metallic-text {
+  background: linear-gradient(180deg, #FFFFFF 0%, #C0C0C0 60%, #888888 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.metallic-silver-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #F5F5F5;
+}
+
+.metallic-button {
+  background: linear-gradient(180deg, #FFFFFF 0%, #D4D4D4 100%);
+  color: #050505;
+  font-weight: 600;
+  border: 1px solid #FFFFFF;
+  transition: all 0.25s ease;
+}
+
+.metallic-button:hover {
+  background: linear-gradient(180deg, #EAEAEA 0%, #B8B8B8 100%);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.metallic-secondary-button {
+  background: rgba(255, 255, 255, 0.04);
+  color: #F5F5F5;
+  border: 1px solid #292929;
+  transition: all 0.2s ease;
+}
+
+.metallic-secondary-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #C0C0C0;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.04);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 5s infinite ease-in-out;
+}
+
+@keyframes breatheExpand {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.4;
+  }
+  25% {
+    transform: scale(1.15);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.9;
+  }
+  75% {
+    transform: scale(0.85);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(0.85);
+    opacity: 0.4;
+  }
+}
+
+.animate-breathe {
+  animation: breatheExpand 16s infinite ease-in-out;
+}
