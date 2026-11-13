@@ -41,7 +41,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
     {
       id: 'm1',
       sender: 'ai',
-      text: `Hello ${user ? user.full_name.split(' ')[0] : 'there'}. I am **urCure AI**, your dedicated mental wellbeing assistant.\n\nI can assist you with scientific stress management techniques, guide you through interactive breathing exercises, help you prepare for a medical consultation, or match you with verified specialists on our platform.\n\n*(Notice: I am an AI system and do not formulate clinical diagnoses or prescribe treatments. If in acute crisis, immediate human help is available).*`,
+      text: `Hello ${user ? user.full_name.split(' ')[0] : 'there'}! I am **urCure AI**, your friendly health helper.\n\nI can help you calm down with easy breathing exercises, prepare questions for your doctor, or help you find the right doctor on our website.\n\n*(Please note: I am an AI helper, not a doctor. I give helpful advice, but cannot diagnose illnesses or prescribe medicine. In an emergency, free human help is always ready).*`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -120,7 +120,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
       const errorMsg: ChatMessage = {
         id: `err-${Date.now()}`,
         sender: 'ai',
-        text: 'I encountered an issue connecting to the wellbeing knowledge base. Please try again.',
+        text: 'I am having trouble connecting right now. Please try again in a moment.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -130,10 +130,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
   };
 
   const quickPrompts = [
-    'Guide me through a breathing exercise',
-    'I feel overwhelmed by work stress',
-    'Recommend a verified psychologist',
-    'How should I prepare for my doctor visit?'
+    'Show me a calm breathing exercise',
+    'I feel very stressed today',
+    'Help me find a doctor for worry',
+    'What should I ask my doctor?'
   ];
 
   return (
@@ -147,12 +147,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-xl font-bold text-white tracking-tight">urCure AI Assistant</h2>
+              <h2 className="text-xl font-bold text-white tracking-tight">urCure AI Helper</h2>
               <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-white/10 text-white">
-                Controlled Healthcare AI
+                Friendly Helper
               </span>
             </div>
-            <p className="text-xs text-[#929292]">Non-clinical supportive guidance, breathing pacing & provider matching</p>
+            <p className="text-xs text-[#929292]">Friendly answers, calm breathing exercises, and doctor advice</p>
           </div>
         </div>
 
@@ -162,7 +162,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
           className="self-start sm:self-auto px-3.5 py-1.5 rounded-lg text-xs font-mono uppercase bg-black border border-white/20 text-[#F5F5F5] hover:border-white transition-all flex items-center space-x-1.5 cursor-pointer"
         >
           <ShieldAlert className="w-3.5 h-3.5" />
-          <span>Immediate SOS</span>
+          <span>Emergency SOS</span>
         </button>
       </div>
 
@@ -172,11 +172,11 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
           <div className="flex items-center justify-between w-full pb-2 border-b border-[#222]">
             <div className="flex items-center space-x-2 text-xs font-mono uppercase text-[#C0C0C0]">
               <Wind className="w-4 h-4 text-white" />
-              <span>Autonomic Regulation: Box Breathing (4-4-4-4)</span>
+              <span>Calm Breathing Exercise (4-4-4-4)</span>
             </div>
             <button
               onClick={() => setBreathingActive(false)}
-              className="text-xs text-[#777] hover:text-white font-mono"
+              className="text-xs text-[#777] hover:text-white font-mono cursor-pointer"
             >
               Close Exercise
             </button>
@@ -197,7 +197,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
             />
             <div className="text-center z-10 space-y-1">
               <span className="text-xs font-mono uppercase tracking-widest text-[#929292]">
-                {breathPhase}
+                {breathPhase === 'Inhale' ? 'Breathe In' : breathPhase === 'Hold' ? 'Hold' : breathPhase === 'Exhale' ? 'Breathe Out' : 'Rest'}
               </span>
               <div className="text-4xl font-extrabold text-white font-mono">
                 {breathCount}
@@ -206,7 +206,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
           </div>
 
           <p className="text-xs text-[#929292] font-mono text-center max-w-md">
-            Slow, equalized respiration signals safety to the amygdala and down-regulates sympathetic nervous activation.
+            Breathe slowly with the circle. Inhale, hold, and breathe out to quickly calm your body and mind.
           </p>
         </div>
       )}
@@ -237,7 +237,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
               {msg.suggestedDoctors && msg.suggestedDoctors.length > 0 && (
                 <div className="mt-4 pt-3 border-t border-[#292929] space-y-2">
                   <span className="text-[11px] font-mono text-[#C0C0C0] uppercase block">
-                    Recommended Verified Specialists:
+                    Doctors Who Can Help:
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {msg.suggestedDoctors.map((doc: any) => (
@@ -248,7 +248,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
                         <div>
                           <div className="font-semibold text-white">{doc.name}</div>
                           <div className="text-[10px] text-[#888]">{doc.specialization}</div>
-                          <div className="text-[10px] font-mono text-[#C0C0C0]">AED {doc.fee} / 30m</div>
+                          <div className="text-[10px] font-mono text-[#C0C0C0]">AED {doc.fee} / 30 mins</div>
                         </div>
                         <button
                           onClick={() => onSelectDoctorForBooking(doc.id)}
@@ -267,7 +267,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
                 <div className="mt-4 pt-3 border-t border-white/20 space-y-3">
                   <div className="flex items-center space-x-1.5 text-white font-semibold text-xs">
                     <ShieldAlert className="w-4 h-4 text-white" />
-                    <span>24/7 Human Emergency Contacts (Abu Dhabi & UAE)</span>
+                    <span>24/7 Free Emergency Phone Numbers (Abu Dhabi & UAE)</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {msg.crisisContacts.map((c: any, i: number) => (
@@ -297,7 +297,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
         {loading && (
           <div className="flex items-center space-x-2 text-xs font-mono text-[#777] p-2">
             <Sparkles className="w-3.5 h-3.5 animate-spin" />
-            <span>urCure AI is processing your query...</span>
+            <span>urCure AI is typing...</span>
           </div>
         )}
 
@@ -326,7 +326,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSend();
           }}
-          placeholder="Ask urCure AI about stress regulation, symptoms, or finding a doctor..."
+          placeholder="Ask a question (e.g. 'I feel stressed', 'Help me find a doctor')..."
           className="w-full pl-4 pr-12 py-3.5 rounded-xl bg-[#111111] border border-[#292929] text-sm text-white placeholder-[#666] focus:outline-none focus:border-white/50"
         />
         <button
@@ -339,7 +339,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
       </div>
 
       <p className="text-[11px] text-[#666666] font-mono text-center">
-        urCure AI complies with clinical safety regulations. Messages are processed confidentially for your personal wellbeing navigation.
+        urCure AI gives helpful advice. All messages are 100% private and confidential.
       </p>
 
     </div>

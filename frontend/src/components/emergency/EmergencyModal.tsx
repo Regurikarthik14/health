@@ -47,32 +47,32 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
     {
       name: 'Abu Dhabi Police Emergency',
       number: '999',
-      badge: 'Immediate Life Threat',
-      desc: 'Immediate dispatch for life-threatening situations, acute physical danger, or crime across the UAE.'
+      badge: 'Immediate Danger',
+      desc: 'Call for immediate police help if you or someone is in physical danger or needs protection.'
     },
     {
       name: 'National Ambulance UAE',
       number: '998',
-      badge: 'Medical Trauma SOS',
-      desc: 'Immediate emergency medical and trauma paramedic dispatch to your exact location in Abu Dhabi.'
+      badge: 'Medical Emergency',
+      desc: 'Call an ambulance right away for serious medical emergencies, injuries, or accidents.'
     },
     {
-      name: 'DoH Estijaba Crisis Emergency Hub',
+      name: 'Estijaba Health Helpline',
       number: '800 1717',
-      badge: 'Department of Health (24/7)',
-      desc: 'Dedicated Abu Dhabi Health Authority emergency hub for urgent psychiatric and acute clinical intake.'
+      badge: 'Health Authority (24/7)',
+      desc: 'Official free 24/7 hotline by Abu Dhabi Health Authority for urgent medical and emotional help.'
     },
     {
-      name: 'UAE National Mental Health Line (HOPE)',
+      name: 'HOPE Mental Health Line',
       number: '800-4673',
-      badge: 'Trained Crisis Counselors',
-      desc: 'Confidential psychological first-aid support line operated by qualified psychological personnel.'
+      badge: 'Emotional Support',
+      desc: 'Free, private phone support to talk through anxiety, sadness, and overwhelming feelings.'
     },
     {
-      name: 'SEHA Hospital Network Abu Dhabi',
+      name: 'SEHA Public Hospitals Abu Dhabi',
       number: '800 50',
-      badge: 'Public Hospital Network',
-      desc: 'Emergency psychiatric and medical inpatient emergency intake coordination.'
+      badge: 'Public Hospitals',
+      desc: 'Connect directly with Abu Dhabi public hospitals for immediate patient admission and care.'
     }
   ];
 
@@ -87,14 +87,14 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
               <ShieldAlert className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">Emergency Support & Crisis Care</h3>
-              <p className="text-[11px] font-mono text-[#C0C0C0]">Abu Dhabi & UAE Sovereign Escalation</p>
+              <h3 className="text-lg font-bold text-white tracking-tight">Emergency Help & Phone Numbers</h3>
+              <p className="text-[11px] font-mono text-[#C0C0C0]">Free Phone Calls in Abu Dhabi & UAE</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#929292] hover:text-white hover:bg-white/[0.05]"
+            className="p-1.5 rounded-lg text-[#929292] hover:text-white hover:bg-white/[0.05] cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -104,20 +104,20 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
         <div className="p-4 rounded-xl bg-white/[0.05] border border-white/20 space-y-1.5">
           <div className="flex items-center space-x-2 text-white text-xs font-semibold uppercase tracking-wider">
             <AlertTriangle className="w-4 h-4 text-white" />
-            <span>Priority Human Clinical Safety Principle</span>
+            <span>Important Safety Note</span>
           </div>
           <p className="text-xs text-[#C0C0C0] leading-relaxed">
-            A patient in immediate danger or acute psychological distress must <strong>never wait for an ordinary doctor appointment</strong>. 
-            All crisis responses and critical clinical decisions remain exclusively under qualified human professionals.
+            If you or someone near you is in immediate physical danger or feeling overwhelmed, please <strong>do not wait for an ordinary appointment</strong>. 
+            Call these free emergency numbers right now.
           </p>
         </div>
 
         {/* 1-Click Instant SOS Trigger */}
         {!sosTriggered ? (
           <div className="p-6 rounded-2xl bg-[#111111] border border-[#292929] text-center space-y-3">
-            <h4 className="text-base font-bold text-white">Need Urgent Escalation Right Now?</h4>
+            <h4 className="text-base font-bold text-white">Need Urgent Help Right Now?</h4>
             <p className="text-xs text-[#929292] max-w-md mx-auto">
-              Press the SOS button below to alert our on-call urgent care coordination lead and log an immediate critical event.
+              Press the button below to alert our on-call urgent support team and see direct numbers.
             </p>
             <button
               onClick={handleTriggerSOS}
@@ -125,15 +125,15 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
               className="px-8 py-3.5 rounded-xl text-sm font-bold text-black bg-white hover:bg-[#EAEAEA] transition-all shadow-[0_0_30px_rgba(255,255,255,0.3)] cursor-pointer disabled:opacity-50 inline-flex items-center space-x-2"
             >
               <ShieldAlert className="w-4 h-4 text-black" />
-              <span>{triggering ? 'Activating Emergency Dispatch...' : 'Activate 1-Click SOS Escalation'}</span>
+              <span>{triggering ? 'Sending Alert...' : 'Send SOS Alert'}</span>
             </button>
           </div>
         ) : (
           <div className="p-5 rounded-2xl bg-white/[0.08] border border-white/40 space-y-2 text-center">
             <CheckCircle2 className="w-7 h-7 text-white mx-auto" />
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider">Human Escalation Protocol Active</h4>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider">Alert Sent Successfully</h4>
             <p className="text-xs text-[#E0E0E0]">
-              Emergency coordinator alerted {crisisEventId ? `(Event #${crisisEventId})` : ''}. Please call the direct dispatch numbers below immediately.
+              Our support team has been notified {crisisEventId ? `(Event #${crisisEventId})` : ''}. Please call the direct numbers below immediately.
             </p>
           </div>
         )}
@@ -141,7 +141,7 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
         {/* Emergency Hotlines Directory */}
         <div className="space-y-3">
           <span className="text-xs font-mono uppercase tracking-wider text-[#777777]">
-            Verified Abu Dhabi & UAE Crisis Hotlines
+            Free Emergency Phone Numbers
           </span>
 
           <div className="space-y-2.5">
@@ -174,8 +174,8 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
 
         {/* Grounding reminder */}
         <div className="p-4 rounded-xl bg-[#050505] border border-[#222] text-xs font-mono text-[#888] space-y-1">
-          <span className="text-white font-bold block">Immediate Grounding Technique (5-4-3-2-1):</span>
-          <span>Notice 5 things you can see, 4 things you can touch, 3 sounds you can hear, 2 scents, and 1 slow breath.</span>
+          <span className="text-white font-bold block">Simple 5-Step Exercise to Calm Down Right Now:</span>
+          <span>Take a slow breath. Notice: 5 things you can see around you, 4 things you can touch, 3 sounds you can hear, 2 scents you can smell, and 1 slow breath.</span>
         </div>
 
       </div>

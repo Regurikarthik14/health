@@ -90,25 +90,57 @@ export const AdminDashboard: React.FC = () => {
       <div className="p-6 sm:p-8 rounded-2xl bg-[#0B0B0B] border border-[#292929] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-mono uppercase text-[#777777]">Administration & Governance</span>
+            <span className="text-xs font-mono uppercase text-[#777777]">Administration & Platform Settings</span>
             <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-white/10 text-white border border-white/20">
-              Department of Health Compliant
+              Certified Platform Compliant
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
-            urCure Central Command
+            urCure Admin Portal
           </h1>
           <p className="text-xs text-[#929292] font-mono mt-0.5">
-            System: {stats?.system_health || 'Operational (99.98%)'} • Architecture: Pure Obsidian Monochrome
+            System Status: All Systems Running Smoothly • 24/7 Monitoring
           </p>
         </div>
 
         <button
           onClick={loadAdminData}
-          className="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-[#111111] border border-[#292929] hover:border-white text-xs font-mono text-white flex items-center space-x-2"
+          className="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-[#111111] border border-[#292929] hover:border-white text-xs font-mono text-white flex items-center space-x-2 cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Sync Engine</span>
+          <span>Refresh Data</span>
+        </button>
+      </div>
+
+      {/* Private Doctor Link Distribution Box */}
+      <div className="p-6 rounded-2xl bg-[#0E0E0E] border border-white/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+        <div className="space-y-1.5">
+          <div className="flex items-center space-x-2">
+            <Lock className="w-4 h-4 text-white" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
+              Private Doctor Invitation Link (Confidential)
+            </h3>
+            <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-mono text-[#AAA]">
+              Doctors Only
+            </span>
+          </div>
+          <p className="text-xs text-[#888888] leading-relaxed max-w-2xl">
+            Provide this separate link <strong className="text-white">only to licensed doctors</strong> to apply or sign in. The public website remains strictly for patients with zero doctor registration visibility.
+          </p>
+          <div className="text-xs font-mono text-white bg-black px-3 py-1.5 rounded-lg border border-[#252525] inline-flex items-center space-x-2">
+            <span>{typeof window !== 'undefined' ? `${window.location.origin}/doctor` : 'http://localhost:5173/doctor'}</span>
+          </div>
+        </div>
+        <button
+          onClick={() => {
+            const url = `${window.location.origin}/doctor`;
+            navigator.clipboard.writeText(url);
+            alert(`Private Doctor Link copied to clipboard:\n${url}\n\nSend this link only to authorized medical doctors.`);
+          }}
+          className="px-4 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] cursor-pointer transition-all flex items-center space-x-1.5 shrink-0 shadow-lg"
+        >
+          <Check className="w-3.5 h-3.5 text-black" />
+          <span>Copy Doctor Link</span>
         </button>
       </div>
 
@@ -117,25 +149,25 @@ export const AdminDashboard: React.FC = () => {
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
           <span className="text-[11px] font-mono text-[#777] uppercase">Registered Patients</span>
           <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.total_patients || 0}</div>
-          <p className="text-[10px] text-[#929292]">Consent records active</p>
+          <p className="text-[10px] text-[#929292]">Active patient accounts</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
-          <span className="text-[11px] font-mono text-[#777] uppercase">Verified Doctors</span>
+          <span className="text-[11px] font-mono text-[#777] uppercase">Approved Doctors</span>
           <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.verified_doctors || 0}</div>
-          <p className="text-[10px] text-[#929292]">{stats?.pending_doctors || 0} pending review</p>
+          <p className="text-[10px] text-[#929292]">{stats?.pending_doctors || 0} pending check</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
-          <span className="text-[11px] font-mono text-[#777] uppercase">Active Bookings</span>
+          <span className="text-[11px] font-mono text-[#777] uppercase">Active Visits</span>
           <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.active_appointments || 0}</div>
-          <p className="text-[10px] text-[#929292]">Exclusive 30m slots</p>
+          <p className="text-[10px] text-[#929292]">Reserved 30-min visits</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
-          <span className="text-[11px] font-mono text-[#777] uppercase">Crisis Escalations</span>
+          <span className="text-[11px] font-mono text-[#777] uppercase">Emergency Alerts</span>
           <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.total_crisis_events || 0}</div>
-          <p className="text-[10px] text-[#929292]">{stats?.open_crisis_events || 0} require review</p>
+          <p className="text-[10px] text-[#929292]">{stats?.open_crisis_events || 0} need attention</p>
         </div>
       </div>
 
@@ -143,10 +175,10 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-5 gap-1 p-1 bg-[#111111] rounded-xl border border-[#292929] max-w-3xl">
         {[
           { id: 'overview', label: 'Platform Stats' },
-          { id: 'doctors', label: 'Doctor Verification' },
-          { id: 'appointments', label: 'All Bookings' },
-          { id: 'crisis', label: 'Crisis Oversight' },
-          { id: 'audit', label: 'Audit Logs' },
+          { id: 'doctors', label: 'Doctor Approvals' },
+          { id: 'appointments', label: 'All Visits' },
+          { id: 'crisis', label: 'Emergency Alerts' },
+          { id: 'audit', label: 'Activity History' },
         ].map((t) => (
           <button
             key={t.id}
@@ -175,23 +207,23 @@ export const AdminDashboard: React.FC = () => {
                 <span className="text-white">PostgreSQL / SQLite WAL Engine</span>
               </div>
               <div className="flex justify-between py-1 border-b border-[#1C1C1C]">
-                <span>Concurrency Mode:</span>
-                <span className="text-white">Serializable Slot Transaction Locking</span>
+                <span>Booking Protection:</span>
+                <span className="text-white">Strict Single-Booking (No Overlaps)</span>
               </div>
               <div className="flex justify-between py-1 border-b border-[#1C1C1C]">
-                <span>Total Entities:</span>
-                <span className="text-white">16 Domain Tables Initialized</span>
+                <span>Total Sections:</span>
+                <span className="text-white">16 Connected System Tables</span>
               </div>
               <div className="flex justify-between py-1 border-b border-[#1C1C1C]">
-                <span>Privacy Isolation:</span>
-                <span className="text-white">Strict Zero-Access to Clinical Notes</span>
+                <span>Patient Privacy:</span>
+                <span className="text-white">Private Doctor Notes Hidden From Admin</span>
               </div>
             </div>
           </div>
 
           <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-4">
             <h3 className="text-sm font-semibold text-white pb-2 border-b border-[#292929]">
-              Registered Patient Directory (Administrative View)
+              Registered Patient Directory
             </h3>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {patients.map((p) => (
@@ -201,7 +233,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="text-[11px] text-[#777] font-mono">{p.email}</div>
                   </div>
                   <span className="text-[10px] font-mono text-[#C0C0C0] uppercase">
-                    {p.appointments_count} Bookings
+                    {p.appointments_count} Visits
                   </span>
                 </div>
               ))}
@@ -215,8 +247,8 @@ export const AdminDashboard: React.FC = () => {
         <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-[#292929]">
             <div>
-              <h3 className="text-sm font-semibold text-white">DoH Doctor Verification Queue</h3>
-              <p className="text-xs text-[#929292]">Only verified doctors appear in patient discovery and can receive bookings.</p>
+              <h3 className="text-sm font-semibold text-white">Doctor Approval List</h3>
+              <p className="text-xs text-[#929292]">Only approved doctors appear on the website and can receive visits.</p>
             </div>
           </div>
 
@@ -234,7 +266,7 @@ export const AdminDashboard: React.FC = () => {
                         ? 'bg-white/10 text-white border-white/20'
                         : 'bg-white/[0.04] text-[#C0C0C0] border-[#333]'
                     }`}>
-                      {doc.is_verified ? 'Verified' : 'Pending Audit'}
+                      {doc.is_verified ? 'Approved' : 'Pending Check'}
                     </span>
                   </div>
                   <p className="text-xs text-[#929292]">{doc.specialization} • License: {doc.license_number}</p>
@@ -250,7 +282,7 @@ export const AdminDashboard: React.FC = () => {
                       : 'bg-white text-black hover:bg-[#EAEAEA]'
                   }`}
                 >
-                  {doc.is_verified ? 'Suspend / Unverify' : 'Verify & Approve Doctor'}
+                  {doc.is_verified ? 'Pause Doctor Account' : 'Approve Doctor'}
                 </button>
               </div>
             ))}
@@ -262,7 +294,7 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === 'appointments' && (
         <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-4">
           <h3 className="text-sm font-semibold text-white pb-3 border-b border-[#292929]">
-            System-Wide Booked Appointments (Administrative Audit)
+            All Visits Booked Across urCure
           </h3>
           <div className="space-y-3">
             {appointments.map((app) => (
@@ -272,11 +304,11 @@ export const AdminDashboard: React.FC = () => {
               >
                 <div>
                   <div className="text-white font-bold">{app.patient_name} → {app.doctor_name}</div>
-                  <div className="text-[#929292]">{app.appointment_date} • {app.start_time} – {app.end_time} ({app.consultation_mode.toUpperCase()})</div>
-                  <div className="text-[#666]">Ref: {app.booking_reference}</div>
+                  <div className="text-[#929292]">{app.appointment_date} • {app.start_time} – {app.end_time} ({app.consultation_mode === 'online' ? 'ONLINE VIDEO' : 'IN CLINIC'})</div>
+                  <div className="text-[#666]">Booking Code: {app.booking_reference}</div>
                 </div>
                 <span className="px-2 py-1 rounded bg-white/10 text-white uppercase text-[10px]">
-                  {app.status}
+                  {app.status === 'confirmed' ? 'Confirmed' : app.status}
                 </span>
               </div>
             ))}
@@ -288,7 +320,7 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === 'crisis' && (
         <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-4">
           <h3 className="text-sm font-semibold text-white pb-3 border-b border-[#292929]">
-            Crisis Escalation Oversight (Abu Dhabi Emergency Protocols)
+            Emergency Call Logs & Safety Alerts
           </h3>
           <div className="space-y-3">
             {crisisEvents.map((evt) => (
@@ -298,7 +330,7 @@ export const AdminDashboard: React.FC = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <span className="font-mono text-white font-bold">Event #{evt.id}</span>
+                    <span className="font-mono text-white font-bold">Alert #{evt.id}</span>
                     <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-white/10 text-white border border-white/20">
                       {evt.risk_level}
                     </span>
@@ -314,14 +346,14 @@ export const AdminDashboard: React.FC = () => {
 
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[11px] font-mono text-[#C0C0C0]">
-                    Lead: {evt.human_agent_id} • Status: {evt.resolved ? 'Resolved' : 'Active Escalation'}
+                    Support: {evt.human_agent_id} • Status: {evt.resolved ? 'Resolved' : 'Active Alert'}
                   </span>
                   {!evt.resolved && (
                     <button
                       onClick={() => handleResolveCrisis(evt.id)}
                       className="px-3 py-1 rounded-lg text-xs font-semibold bg-white text-black hover:bg-[#EAEAEA]"
                     >
-                      Resolve Event
+                      Mark as Resolved
                     </button>
                   )}
                 </div>
@@ -335,7 +367,7 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === 'audit' && (
         <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-4">
           <h3 className="text-sm font-semibold text-white pb-3 border-b border-[#292929]">
-            Security Audit Trail
+            System Activity & Security History
           </h3>
           <div className="space-y-2 font-mono text-xs">
             {auditLogs.map((log) => (

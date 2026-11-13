@@ -85,7 +85,7 @@ export const DoctorDashboard: React.FC = () => {
       await loadDoctorData();
       setTimeout(() => setNoteSuccess(false), 3000);
     } catch (err: any) {
-      alert(err.message || 'Failed to submit clinical notes');
+      alert(err.message || 'Failed to save visit notes');
     } finally {
       setNoteSubmitting(false);
     }
@@ -121,9 +121,9 @@ export const DoctorDashboard: React.FC = () => {
       <div className="p-6 sm:p-8 rounded-2xl bg-[#0B0B0B] border border-[#292929] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-mono uppercase text-[#777777]">Clinician Portal</span>
+            <span className="text-xs font-mono uppercase text-[#777777]">Doctor Portal</span>
             <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-white/10 text-white border border-white/20">
-              {stats?.is_verified ? 'DoH Licensed & Verified' : 'Verification In Review'}
+              {stats?.is_verified ? 'Licensed & Verified Doctor' : 'Verification In Review'}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
@@ -153,36 +153,36 @@ export const DoctorDashboard: React.FC = () => {
       {/* KPI Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
-          <span className="text-[11px] font-mono text-[#777777] uppercase">Today's Queue</span>
+          <span className="text-[11px] font-mono text-[#777777] uppercase">Today's Visits</span>
           <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{todayApps.length}</div>
-          <p className="text-[10px] text-[#929292]">Exclusive 30m slots</p>
+          <p className="text-[10px] text-[#929292]">30-minute appointments</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
-          <span className="text-[11px] font-mono text-[#777777] uppercase">Upcoming Bookings</span>
+          <span className="text-[11px] font-mono text-[#777777] uppercase">Upcoming Visits</span>
           <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.upcoming_count || 3}</div>
-          <p className="text-[10px] text-[#929292]">Confirmed consultations</p>
+          <p className="text-[10px] text-[#929292]">Confirmed patient visits</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
-          <span className="text-[11px] font-mono text-[#777777] uppercase">Completed Consults</span>
+          <span className="text-[11px] font-mono text-[#777777] uppercase">Completed Visits</span>
           <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.completed_count || 12}</div>
-          <p className="text-[10px] text-[#929292]">Archived clinical records</p>
+          <p className="text-[10px] text-[#929292]">Saved patient notes</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
-          <span className="text-[11px] font-mono text-[#777777] uppercase">Patient Network</span>
+          <span className="text-[11px] font-mono text-[#777777] uppercase">Total Patients</span>
           <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.total_patients || 18}</div>
-          <p className="text-[10px] text-[#929292]">Active care relationships</p>
+          <p className="text-[10px] text-[#929292]">Patients cared for</p>
         </div>
       </div>
 
       {/* Tab Switchers */}
       <div className="grid grid-cols-4 gap-1 p-1 bg-[#111111] rounded-xl border border-[#292929] max-w-2xl">
         {[
-          { id: 'queue', label: "Today's Queue" },
-          { id: 'appointments', label: 'All Bookings' },
-          { id: 'notes', label: 'Record Clinical Notes' },
+          { id: 'queue', label: "Today's Visits" },
+          { id: 'appointments', label: 'All Visits' },
+          { id: 'notes', label: 'Write Visit Notes' },
           { id: 'availability', label: 'Working Hours' },
         ].map((t) => (
           <button
@@ -203,13 +203,13 @@ export const DoctorDashboard: React.FC = () => {
       {activeTab === 'queue' && (
         <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-[#292929]">
-            <h3 className="text-sm font-semibold text-white">Today's Patient Queue (30-Min Intervals)</h3>
+            <h3 className="text-sm font-semibold text-white">Today's Patient Visits (30-Minute Slots)</h3>
             <span className="text-xs font-mono text-[#777]">{new Date().toLocaleDateString()}</span>
           </div>
 
           {todayApps.length === 0 ? (
             <div className="p-8 text-center text-xs font-mono text-[#777] bg-[#111] rounded-xl border border-[#222]">
-              No appointments scheduled for today.
+              No visits scheduled for today.
             </div>
           ) : (
             <div className="space-y-3">
@@ -225,11 +225,11 @@ export const DoctorDashboard: React.FC = () => {
                       </span>
                       <h4 className="text-sm font-bold text-white">{app.patient_name}</h4>
                       <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-white/[0.04] text-[#C0C0C0] border border-[#333]">
-                        {app.consultation_mode}
+                        {app.consultation_mode === 'online' ? 'Online Video' : 'In Clinic'}
                       </span>
                     </div>
-                    <p className="text-xs text-[#929292]">Reason: {app.reason || 'Wellbeing check-in'}</p>
-                    <p className="text-[11px] font-mono text-[#777]">Booking Ref: {app.booking_reference}</p>
+                    <p className="text-xs text-[#929292]">Reason: {app.reason || 'General check-in'}</p>
+                    <p className="text-[11px] font-mono text-[#777]">Booking Code: {app.booking_reference}</p>
                   </div>
 
                   <div className="flex items-center space-x-2">
@@ -241,11 +241,11 @@ export const DoctorDashboard: React.FC = () => {
                         className="px-4 py-2 rounded-lg text-xs font-semibold text-black bg-white hover:bg-[#EAEAEA] flex items-center space-x-1.5"
                       >
                         <Video className="w-3.5 h-3.5" />
-                        <span>Launch Video Room</span>
+                        <span>Join Video Call</span>
                       </a>
                     ) : (
                       <span className="px-3 py-1.5 rounded-lg text-xs font-mono bg-[#050505] border border-[#222] text-[#929292]">
-                        In-Person Check-In
+                        In Clinic Visit
                       </span>
                     )}
 
@@ -256,7 +256,7 @@ export const DoctorDashboard: React.FC = () => {
                       }}
                       className="px-3 py-2 rounded-lg text-xs font-semibold text-white bg-[#050505] border border-[#292929] hover:border-white/50"
                     >
-                      Record Notes
+                      Write Notes
                     </button>
                   </div>
                 </div>
@@ -270,7 +270,7 @@ export const DoctorDashboard: React.FC = () => {
       {activeTab === 'appointments' && (
         <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-4">
           <h3 className="text-sm font-semibold text-white pb-3 border-b border-[#292929]">
-            Comprehensive Bookings History
+            All Past & Upcoming Visits
           </h3>
           <div className="space-y-3">
             {allAppointments.map((app) => (
@@ -281,11 +281,11 @@ export const DoctorDashboard: React.FC = () => {
                 <div>
                   <div className="text-white font-bold">{app.patient_name}</div>
                   <div className="text-[#929292]">{app.appointment_date} • {app.start_time} – {app.end_time}</div>
-                  <div className="text-[#666]">Ref: {app.booking_reference}</div>
+                  <div className="text-[#666]">Booking Code: {app.booking_reference}</div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="px-2 py-1 rounded bg-white/10 text-white uppercase text-[10px]">
-                    {app.status}
+                    {app.status === 'confirmed' ? 'Confirmed' : app.status}
                   </span>
                 </div>
               </div>
@@ -298,47 +298,47 @@ export const DoctorDashboard: React.FC = () => {
       {activeTab === 'notes' && (
         <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-6">
           <div className="pb-3 border-b border-[#292929]">
-            <h3 className="text-base font-semibold text-white">Record Clinical Consultation Notes</h3>
+            <h3 className="text-base font-semibold text-white">Write Doctor Visit Notes</h3>
             <p className="text-xs text-[#929292]">
-              Secure documentation for {selectedAppForNote ? selectedAppForNote.patient_name : 'Consultation'}
+              Private doctor notes for {selectedAppForNote ? selectedAppForNote.patient_name : 'Patient'}
             </p>
           </div>
 
           {noteSuccess && (
             <div className="p-3.5 rounded-xl bg-white/10 border border-white/30 text-xs text-white flex items-center space-x-2">
               <CheckCircle className="w-4 h-4 text-white" />
-              <span>Consultation notes and follow-up recommendation securely committed.</span>
+              <span>Doctor notes and follow-up advice saved successfully.</span>
             </div>
           )}
 
           <form onSubmit={handleSaveNotes} className="space-y-4 text-left">
             <div className="space-y-1">
-              <label className="text-[11px] font-mono text-[#777777] uppercase">Diagnostic & Observation Notes</label>
+              <label className="text-[11px] font-mono text-[#777777] uppercase">Doctor Findings & Observations</label>
               <textarea
                 rows={3}
                 required
                 value={diagNotes}
                 onChange={(e) => setDiagNotes(e.target.value)}
-                placeholder="Clinical observations, mental status exam summary, stressors identified..."
+                placeholder="Write how the patient is doing, what they shared, and doctor observations..."
                 className="w-full px-3 py-2.5 rounded-xl bg-[#111111] border border-[#292929] text-xs text-white placeholder-[#555] focus:outline-none focus:border-white/50"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-mono text-[#777777] uppercase">Care Plan & Recommendations</label>
+              <label className="text-[11px] font-mono text-[#777777] uppercase">Advice & Plan for Patient</label>
               <textarea
                 rows={2}
                 required
                 value={recs}
                 onChange={(e) => setRecs(e.target.value)}
-                placeholder="Behavioral modifications, sleep schedule, grounding interventions..."
+                placeholder="Daily tips, sleep routine, breathing exercises, or lifestyle steps..."
                 className="w-full px-3 py-2.5 rounded-xl bg-[#111111] border border-[#292929] text-xs text-white placeholder-[#555] focus:outline-none focus:border-white/50"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-[#777777] uppercase">Prescriptions / Supplements (Optional)</label>
+                <label className="text-[11px] font-mono text-[#777777] uppercase">Medicines or Vitamins (Optional)</label>
                 <input
                   type="text"
                   value={prescriptions}
@@ -349,7 +349,7 @@ export const DoctorDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-[#777777] uppercase">Recommended Follow-up Date</label>
+                <label className="text-[11px] font-mono text-[#777777] uppercase">Next Recommended Visit Date</label>
                 <input
                   type="date"
                   value={followUpDate}
@@ -364,7 +364,7 @@ export const DoctorDashboard: React.FC = () => {
               disabled={noteSubmitting}
               className="px-6 py-3 rounded-xl text-xs font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all disabled:opacity-40"
             >
-              {noteSubmitting ? 'Committing...' : 'Finalize Consultation & Commit Record'}
+              {noteSubmitting ? 'Saving...' : 'Save Visit Notes for Patient'}
             </button>
           </form>
         </div>
@@ -374,16 +374,16 @@ export const DoctorDashboard: React.FC = () => {
       {activeTab === 'availability' && (
         <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-6">
           <div className="pb-3 border-b border-[#292929]">
-            <h3 className="text-base font-semibold text-white">Configure Working Hours & 30-Min Slots</h3>
+            <h3 className="text-base font-semibold text-white">Set Your Working Hours</h3>
             <p className="text-xs text-[#929292]">
-              The system automatically slices working hours into exclusive 30-minute intervals, excluding lunch breaks.
+              Your hours are divided into 30-minute appointments, leaving your lunch break open.
             </p>
           </div>
 
           {availSaved && (
             <div className="p-3.5 rounded-xl bg-white/10 border border-white/30 text-xs text-white flex items-center space-x-2">
               <CheckCircle className="w-4 h-4 text-white" />
-              <span>Availability schedule updated successfully across all patient calendars.</span>
+              <span>Working hours saved! New 30-minute slots are open for patients.</span>
             </div>
           )}
 
@@ -435,7 +435,7 @@ export const DoctorDashboard: React.FC = () => {
               disabled={availSaving}
               className="px-6 py-2.5 rounded-xl text-xs font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all"
             >
-              {availSaving ? 'Updating Slots...' : 'Save 30-Min Schedule'}
+              {availSaving ? 'Saving...' : 'Save Working Hours'}
             </button>
           </form>
         </div>

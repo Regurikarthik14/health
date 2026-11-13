@@ -7,8 +7,8 @@ assessment_bp = Blueprint('assessments', __name__)
 
 VALIDATED_INSTRUMENTS = {
     'PHQ-9': {
-        'title': 'PHQ-9 Mental Wellbeing & Mood Screening',
-        'subtitle': 'Validated 9-item scale for understanding changes in mood and energy levels over the last 2 weeks.',
+        'title': 'Mood & Feelings Check',
+        'subtitle': 'A simple 9-question check to understand your mood and energy over the last 2 weeks.',
         'max_score': 27,
         'options': [
             {'label': 'Not at all', 'score': 0},
@@ -17,20 +17,20 @@ VALIDATED_INSTRUMENTS = {
             {'label': 'Nearly every day', 'score': 3}
         ],
         'questions': [
-            {'id': 'q1', 'text': 'Little interest or pleasure in doing things you normally enjoy?'},
-            {'id': 'q2', 'text': 'Feeling down, depressed, lethargic, or hopeless?'},
-            {'id': 'q3', 'text': 'Trouble falling or staying asleep, or sleeping excessively?'},
-            {'id': 'q4', 'text': 'Feeling tired or having little physical and mental energy?'},
-            {'id': 'q5', 'text': 'Poor appetite or tendency to overeat?'},
-            {'id': 'q6', 'text': 'Feeling bad about yourself, or that you are a failure or let yourself/family down?'},
-            {'id': 'q7', 'text': 'Trouble concentrating on things, such as reading documents or watching news?'},
-            {'id': 'q8', 'text': 'Moving or speaking noticeably slowly, or being unusually fidgety and restless?'},
-            {'id': 'q9', 'text': 'Thoughts that you would be better off not waking up, or thoughts of hurting yourself in any way?'}
+            {'id': 'q1', 'text': 'Have you had little interest or joy in doing things you normally enjoy?'},
+            {'id': 'q2', 'text': 'Have you felt down, sad, or hopeless?'},
+            {'id': 'q3', 'text': 'Have you had trouble falling or staying asleep, or sleeping too much?'},
+            {'id': 'q4', 'text': 'Have you felt tired or had very little energy?'},
+            {'id': 'q5', 'text': 'Have you had poor appetite, or felt like eating too much?'},
+            {'id': 'q6', 'text': 'Have you felt bad about yourself, or felt like you let yourself or your family down?'},
+            {'id': 'q7', 'text': 'Have you had trouble focusing on things, like reading or watching TV?'},
+            {'id': 'q8', 'text': 'Have you been moving or speaking unusually slowly, or been too restless to sit still?'},
+            {'id': 'q9', 'text': 'Have you had thoughts of hurting yourself, or wished you would not wake up?'}
         ]
     },
     'GAD-7': {
-        'title': 'GAD-7 Anxiety & Nervous Tension Screening',
-        'subtitle': 'Validated 7-item scale assessing symptoms of persistent anxiety and worry.',
+        'title': 'Anxiety & Worry Check',
+        'subtitle': 'A simple 7-question check to understand feeling nervous or worried.',
         'max_score': 21,
         'options': [
             {'label': 'Not at all', 'score': 0},
@@ -39,18 +39,18 @@ VALIDATED_INSTRUMENTS = {
             {'label': 'Nearly every day', 'score': 3}
         ],
         'questions': [
-            {'id': 'q1', 'text': 'Feeling nervous, anxious, or on edge?'},
-            {'id': 'q2', 'text': 'Not being able to stop or control worrying?'},
-            {'id': 'q3', 'text': 'Worrying too much about different things?'},
-            {'id': 'q4', 'text': 'Trouble relaxing even during downtime?'},
-            {'id': 'q5', 'text': 'Being so restless that it is hard to sit still?'},
-            {'id': 'q6', 'text': 'Becoming easily annoyed, frustrated, or irritable?'},
-            {'id': 'q7', 'text': 'Feeling afraid as if something awful might happen?'}
+            {'id': 'q1', 'text': 'Have you felt nervous, anxious, or on edge?'},
+            {'id': 'q2', 'text': 'Have you been unable to stop or control your worrying?'},
+            {'id': 'q3', 'text': 'Have you been worrying too much about different things?'},
+            {'id': 'q4', 'text': 'Have you had trouble relaxing?'},
+            {'id': 'q5', 'text': 'Have you been so restless that it was hard to sit still?'},
+            {'id': 'q6', 'text': 'Have you gotten annoyed or upset easily?'},
+            {'id': 'q7', 'text': 'Have you felt afraid that something bad might happen?'}
         ]
     },
     'PSS-10': {
-        'title': 'PSS-10 Perceived Stress Assessment',
-        'subtitle': 'Global gold-standard measure of the degree to which situations in life are appraised as stressful.',
+        'title': 'Stress Check',
+        'subtitle': 'A simple 10-question check to understand how much stress you have felt recently.',
         'max_score': 40,
         'options': [
             {'label': 'Never', 'score': 0},
@@ -60,21 +60,21 @@ VALIDATED_INSTRUMENTS = {
             {'label': 'Very Often', 'score': 4}
         ],
         'questions': [
-            {'id': 'q1', 'text': 'Been upset because of something that happened unexpectedly?'},
-            {'id': 'q2', 'text': 'Felt that you were unable to control the important things in your life?'},
-            {'id': 'q3', 'text': 'Felt nervous and "stressed"? (appraised as high pressure)'},
-            {'id': 'q4', 'text': 'Felt confident about your ability to handle your personal problems? (reversed)', 'reversed': True},
-            {'id': 'q5', 'text': 'Felt that things were going your way? (reversed)', 'reversed': True},
-            {'id': 'q6', 'text': 'Found that you could not cope with all the things that you had to do?'},
-            {'id': 'q7', 'text': 'Been able to control irritations in your daily routine? (reversed)', 'reversed': True},
-            {'id': 'q8', 'text': 'Felt that you were on top of things? (reversed)', 'reversed': True},
-            {'id': 'q9', 'text': 'Been angered because of things that happened outside of your control?'},
-            {'id': 'q10', 'text': 'Felt difficulties were piling up so high that you could not overcome them?'}
+            {'id': 'q1', 'text': 'Been upset because something happened that you did not expect?'},
+            {'id': 'q2', 'text': 'Felt that you were unable to control important things in your life?'},
+            {'id': 'q3', 'text': 'Felt nervous or stressed?'},
+            {'id': 'q4', 'text': 'Felt confident about your ability to handle your personal problems?'},
+            {'id': 'q5', 'text': 'Felt that things were going well for you?'},
+            {'id': 'q6', 'text': 'Found that you could not handle everything you had to do?'},
+            {'id': 'q7', 'text': 'Been able to handle small daily annoyances calmly?'},
+            {'id': 'q8', 'text': 'Felt that you were on top of things?'},
+            {'id': 'q9', 'text': 'Been angry because things happened that you could not control?'},
+            {'id': 'q10', 'text': 'Felt that difficulties were piling up so high you could not handle them?'}
         ]
     },
     'WHO-5': {
-        'title': 'WHO-5 Psychological Wellbeing Index',
-        'subtitle': 'World Health Organization indicator measuring positive psychological wellbeing and quality of life.',
+        'title': 'Wellbeing Check',
+        'subtitle': 'A quick 5-question check to see how happy and rested you feel.',
         'max_score': 25,
         'options': [
             {'label': 'At no time', 'score': 0},
@@ -87,7 +87,7 @@ VALIDATED_INSTRUMENTS = {
         'questions': [
             {'id': 'q1', 'text': 'I have felt cheerful and in good spirits.'},
             {'id': 'q2', 'text': 'I have felt calm and relaxed.'},
-            {'id': 'q3', 'text': 'I have felt active and vigorous.'},
+            {'id': 'q3', 'text': 'I have felt active and energetic.'},
             {'id': 'q4', 'text': 'I woke up feeling fresh and rested.'},
             {'id': 'q5', 'text': 'My daily life has been filled with things that interest me.'}
         ]
@@ -96,8 +96,7 @@ VALIDATED_INSTRUMENTS = {
 
 def interpret_score(instrument_type, score, max_score, critical_flag=False):
     """
-    Computes clinically calibrated severity level and personalized non-diagnostic recommendations.
-    Enforces strict safety rules: AI screening never independently diagnoses.
+    Computes severity level and personalized non-diagnostic recommendations using beginner-friendly English.
     """
     severity = 'minimal'
     interpretation = ''
@@ -106,98 +105,98 @@ def interpret_score(instrument_type, score, max_score, critical_flag=False):
     if instrument_type == 'PHQ-9':
         if score <= 4:
             severity = 'minimal'
-            interpretation = 'Minimal depressive symptoms indicated. Your responses reflect baseline healthy emotional resilience.'
+            interpretation = 'You are doing well. Your answers show good emotional health and energy.'
             recommendations = [
-                'Maintain regular sleep hygiene (7-8 hours nightly).',
-                'Engage in 20-30 minutes of daily physical movement.',
-                'Continue balanced social engagement and proactive stress breaks.'
+                'Keep up your regular sleep habits (7 to 8 hours each night).',
+                'Enjoy a 20 to 30 minute walk or light exercise every day.',
+                'Stay connected with friends and family.'
             ]
         elif score <= 9:
             severity = 'mild'
-            interpretation = 'Mild mood fluctuations detected. You may be experiencing situational fatigue or mild stress.'
+            interpretation = 'You might be feeling a little tired or mildly stressed. Taking restful breaks will help.'
             recommendations = [
-                'Incorporate brief mindfulness pauses or 4-7-8 breathing exercises.',
-                'Prioritize restorative hobbies and schedule non-screen downtime.',
-                'Consider scheduling a discovery consultation with an urCure wellbeing counselor.'
+                'Take short pauses during the day to take slow, deep breaths.',
+                'Spend time on hobbies you enjoy away from screens and phones.',
+                'Talk things through with a friend or book a quick chat with an urCure doctor.'
             ]
         elif score <= 14:
             severity = 'moderate'
-            interpretation = 'Moderate symptoms indicated. Noticeable impact on energy, focus, and daily enjoyment is present.'
+            interpretation = 'You seem to be carrying a noticeable amount of stress or low mood. Talking to a doctor can give you great support.'
             recommendations = [
-                'We recommend booking an appointment with a verified Psychiatrist or Psychologist on urCure.',
-                'Establish a consistent daytime routine with daylight exposure.',
-                'Break major tasks into smaller manageable intervals to relieve cognitive load.'
+                'We recommend booking an easy 30-minute visit with a friendly doctor on urCure.',
+                'Get some natural morning sunlight and keep a gentle daily routine.',
+                'Break big tasks into smaller, easy steps to feel less overwhelmed.'
             ]
         elif score <= 19:
             severity = 'moderately_severe'
-            interpretation = 'Moderately severe symptoms indicated. Symptoms are likely causing significant disruption to your personal or professional routine.'
+            interpretation = 'Your mood feels heavy right now and is affecting your day. We recommend speaking with a doctor soon.'
             recommendations = [
-                'Professional healthcare support is strongly recommended.',
-                'Explore our verified doctors directory to book a 30-minute direct consultation.',
-                'Reach out to trusted family or mentors for supportive companionship.'
+                'Speaking with a healthcare professional is strongly recommended.',
+                'Browse our verified doctors to book a private 30-minute video or clinic visit.',
+                'Reach out to a family member or friend for supportive company.'
             ]
         else:
             severity = 'severe'
-            interpretation = 'Severe distress level detected. Comprehensive healthcare professional evaluation is advised promptly.'
+            interpretation = 'You are going through a very tough time. Please reach out to a doctor or emergency helper right away—you do not have to handle this alone.'
             recommendations = [
-                'Immediate consultation with a qualified mental health clinician is advised.',
-                'Access our emergency support line if you feel overwhelmed or unsafe.',
-                'You do not have to navigate this alone; professional care provides effective pathways forward.'
+                'We encourage you to speak with a caring doctor or counselor as soon as possible.',
+                'Use our 24/7 emergency help button if you feel unsafe or overwhelmed.',
+                'Remember that support is always ready and you are never alone.'
             ]
 
     elif instrument_type == 'GAD-7':
         if score <= 4:
             severity = 'minimal'
-            interpretation = 'Minimal anxiety symptoms. Healthy nervous system equilibrium.'
+            interpretation = 'Your worry level is low. You are feeling calm, balanced, and peaceful.'
             recommendations = [
-                'Continue your current positive stress management habits.',
-                'Practice deep breathing to maintain autonomic stability.'
+                'Keep up your healthy daily habits.',
+                'Take slow, deep breaths whenever you feel busy.'
             ]
         elif score <= 9:
             severity = 'mild'
-            interpretation = 'Mild anxiety symptoms present. Occasional restlessness or worry.'
+            interpretation = 'You have some mild worry from time to time. Gentle breathing and quiet rest can help.'
             recommendations = [
-                'Reduce caffeine and late-evening stimulant consumption.',
-                'Try guided progressive muscle relaxation via urCure AI.',
-                'Keep a structured thought journal to externalize cyclical worries.'
+                'Drink water and cut down on coffee or sodas late in the day.',
+                'Try the calm breathing guide with our AI Helper.',
+                'Write down your thoughts in a notebook to clear your head.'
             ]
         elif score <= 14:
             severity = 'moderate'
-            interpretation = 'Moderate anxiety symptoms detected. Frequent worry impacting rest and focus.'
+            interpretation = 'You are experiencing frequent worry that might make it hard to focus or sleep. A doctor can help you feel much better.'
             recommendations = [
-                'Consult with an urCure clinical psychologist specializing in anxiety.',
-                'Practice Box Breathing (4s inhale, 4s hold, 4s exhale, 4s hold) during peak stress.',
-                'Limit excessive exposure to sensationalist digital media.'
+                'Book a 30-minute visit with an urCure doctor who helps with worry and stress.',
+                'Try box breathing (breathe in for 4 seconds, hold for 4, breathe out for 4).',
+                'Take breaks from news and social media.'
             ]
         else:
             severity = 'severe'
-            interpretation = 'Severe anxiety symptoms indicated. High levels of somatic tension and autonomic overarousal.'
+            interpretation = 'Your anxiety level is high. Please speak with a caring doctor who can help you feel safe and calm.'
             recommendations = [
-                'Schedule a consultation with an urCure specialist doctor promptly.',
-                'Ground yourself using sensory cues (5 things you see, 4 you feel, 3 you hear).',
-                'Consultation with a professional can provide evidence-based care plans.'
+                'Book a private visit with an urCure doctor today.',
+                'Use the 5-4-3-2-1 technique: notice 5 things you can see and 4 things you can touch.',
+                'Doctors have simple, proven tools to help you feel peaceful again.'
             ]
 
     elif instrument_type == 'PSS-10':
         if score <= 13:
             severity = 'low'
-            interpretation = 'Low perceived stress level. You report feeling adequate control over daily demands.'
-            recommendations = ['Continue your balanced lifestyle and protective boundaries.']
+            interpretation = 'Your stress level is low. You feel in good control of your daily life.'
+            recommendations = ['Keep up your balanced routine and healthy personal boundaries.']
         elif score <= 26:
             severity = 'moderate'
-            interpretation = 'Moderate perceived stress. You are balancing substantial pressures and may feel occasional strain.'
+            interpretation = 'You have a moderate amount of stress. Remember to take time for yourself each day.'
             recommendations = [
-                'Delegate secondary tasks where possible.',
-                'Block non-negotiable recovery windows in your weekly calendar.',
-                'Explore stress-resilience counseling on urCure.'
+                'Ask others to help with chores or tasks when possible.',
+                'Set aside quiet rest time in your weekly schedule.',
+                'Consider a quick check-in visit with an urCure doctor.'
             ]
         else:
             severity = 'high'
-            interpretation = 'High perceived stress level. Demands are frequently perceived as exceeding current coping resources.'
+            interpretation = 'Your stress level is high. It is important to slow down, ask for help, and talk to a healthcare professional.'
             recommendations = [
-                'Seek guidance from an urCure doctor or wellbeing professional.',
-                'Evaluate workloads and introduce structured stress decompression routines.',
-                'Utilize the urCure AI breathing assistant for rapid autonomic reset.'
+                'Speak with an urCure doctor for personal stress relief advice.',
+                'Take a few short breaks throughout the day to relax your shoulders and breathe.',
+                'Use the urCure AI breathing helper anytime you feel tense.'
             ]
 
     else:
@@ -205,14 +204,14 @@ def interpret_score(instrument_type, score, max_score, critical_flag=False):
         pct = (score / max_score) * 100
         if pct >= 50:
             severity = 'healthy'
-            interpretation = f'Good psychological wellbeing index ({pct:.0f}%). Positive emotional outlook indicated.'
-            recommendations = ['Keep cultivating meaningful activities, physical health, and social connection.']
+            interpretation = f'Good wellbeing score ({pct:.0f}%). You are feeling positive, healthy, and happy.'
+            recommendations = ['Keep doing the things that bring you happiness and peace.']
         else:
             severity = 'low'
-            interpretation = f'Reduced psychological wellbeing index ({pct:.0f}%). Potential indicator of vitality depletion or low mood.'
+            interpretation = f'Your wellbeing score is lower than usual ({pct:.0f}%). You may need extra rest and doctor advice.'
             recommendations = [
-                'Consider scheduling an exploratory session with an urCure wellbeing specialist.',
-                'Incorporate daily walks in natural sunlight and intentional sleep scheduling.'
+                'Consider booking a friendly 30-minute talk with an urCure doctor.',
+                'Go for a gentle walk in the morning sun and aim for restful sleep.'
             ]
 
     return severity, interpretation, recommendations
@@ -260,7 +259,7 @@ def submit_assessment():
     severity, interpretation, recommendations = interpret_score(instrument_type, total_score, max_score, critical_risk)
 
     rec_text = "\n".join([f"• {r}" for r in recommendations])
-    disclaimer_text = "AI wellbeing screenings are validated educational self-assessments designed for early recognition. They do not formulate clinical diagnoses or replace evaluation by licensed physicians or psychiatrists."
+    disclaimer_text = "This wellbeing check is a friendly self-guide. It does not replace a visit or examination by a licensed medical doctor."
 
     assessment = Assessment(
         patient_id=patient.id,

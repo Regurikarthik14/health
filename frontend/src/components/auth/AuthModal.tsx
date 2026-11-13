@@ -6,6 +6,7 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialTab?: 'login' | 'register_patient' | 'register_doctor';
+  portalMode?: 'patient' | 'doctor';
   onSuccess: () => void;
 }
 
@@ -13,12 +14,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   initialTab = 'login',
+  portalMode = 'patient',
   onSuccess
 }) => {
   const { login, registerPatient, registerDoctor } = useAuth();
+  const [currentPortal, setCurrentPortal] = useState<'patient' | 'doctor'>(
+    portalMode || (initialTab === 'register_doctor' ? 'doctor' : 'patient')
+  );
   const [tab, setTab] = useState<'login' | 'register_patient' | 'register_doctor'>(initialTab);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Sync portal mode when opened or props change
+  React.useEffect(() => {
+    if (isOpen) {
+      const targetPortal = portalMode || (initialTab === 'register_doctor' ? 'doctor' : 'patient');
+      setCurrentPortal(targetPortal);
+      if (targetPortal === 'doctor') {
+        setTab(initialTab === 'register_doctor' ? 'register_doctor' : 'login');
+      } else {
+        setTab(initialTab === 'register_patient' ? 'register_patient' : 'login');
+      }
+      setError(null);
+    }
+  }, [isOpen, portalMode, initialTab]);
 
   // Login form
   const [email, setEmail] = useState('');
@@ -115,7 +134,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         clinic_address: dAddress,
         consultation_modes: dModes
       });
-      setDNotice('Doctor account registered! Your credentials have been submitted for verification.');
+      setDNotice('Doctor account created! Your details were sent to our team for quick review.');
       setTimeout(() => {
         onSuccess();
         onClose();
@@ -144,16 +163,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
       <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0B0B0B] border border-[#292929] shadow-2xl p-6 sm:p-8 space-y-6">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#292929]">
-          <div className="flex items-center space-x-2">
-            <div className="w-7 h-7 rounded-lg bg-[#111111] border border-[#292929] flex items-center justify-center">
-              <div className="w-2.5 h-2.5 rounded-full bg-white" />
+          <div className="flex items-center space-x-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#111111] border border-[#292929] flex items-center justify-center">
+              {currentPortal === 'doctor' ? (
+                <Stethoscope className="w-4 h-4 text-white" />
+              ) : (
+                <UserCheck className="w-4 h-4 text-white" />
+              )}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">urCure Security</h3>
-              <p className="text-[11px] font-mono text-[#777777]">Obsidian Encrypted Access</p>
+              <h3 className="text-lg font-bold text-white tracking-tight">
+                {currentPortal === 'doctor' ? 'urCure Doctor Portal' : 'urCure Patient Portal'}
+              </h3>
+              <p className="text-[11px] font-mono text-[#777777]">
+                {currentPortal === 'doctor' ? 'Verified Healthcare Professionals Only' : 'Safe & Private Patient Access'}
+              </p>
             </div>
           </div>
           <button
@@ -164,71 +191,107 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
-        {/* Tab switchers */}
-        <div className="grid grid-cols-3 gap-1 p-1 bg-[#111111] rounded-xl border border-[#292929]">
-          <button
-            type="button"
-            onClick={() => { setTab('login'); setError(null); }}
-            className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-              tab === 'login'
-                ? 'bg-white text-black font-bold shadow-md'
-                : 'text-[#929292] hover:text-white'
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => { setTab('register_patient'); setError(null); }}
-            className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-              tab === 'register_patient'
-                ? 'bg-white text-black font-bold shadow-md'
-                : 'text-[#929292] hover:text-white'
-            }`}
-          >
-            Patient Sign Up
-          </button>
-          <button
-            type="button"
-            onClick={() => { setTab('register_doctor'); setError(null); }}
-            className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-              tab === 'register_doctor'
-                ? 'bg-white text-black font-bold shadow-md'
-                : 'text-[#929292] hover:text-white'
-            }`}
-          >
-            Doctor Sign Up
-          </button>
+        {/* Doctor Verification Safety Banner (Only shown in Doctor Portal) */}
+        {currentPortal === 'doctor' && (
+          <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/20 text-xs text-[#C0C0C0] space-y-1">
+            <div className="flex items-center space-x-1.5 text-white font-semibold">
+              <ShieldCheck className="w-4 h-4 text-white" />
+              <span>Doctor Verification Gate</span>
+            </div>
+            <p className="text-[11px] text-[#929292] leading-relaxed">
+              Every doctor account is audited by medical administration against official registers before patient bookings are activated. Patients must use the Patient Portal.
+            </p>
+          </div>
+        )}
+
+        {/* Tab switchers - SEPARATE TABS PER PORTAL */}
+        <div className="grid grid-cols-2 gap-1 p-1 bg-[#111111] rounded-xl border border-[#292929]">
+          {currentPortal === 'patient' ? (
+            <>
+              <button
+                type="button"
+                onClick={() => { setTab('login'); setError(null); }}
+                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+                  tab === 'login'
+                    ? 'bg-white text-black font-bold shadow-md'
+                    : 'text-[#929292] hover:text-white'
+                }`}
+              >
+                Patient Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setTab('register_patient'); setError(null); }}
+                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+                  tab === 'register_patient'
+                    ? 'bg-white text-black font-bold shadow-md'
+                    : 'text-[#929292] hover:text-white'
+                }`}
+              >
+                Create Patient Account
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => { setTab('login'); setError(null); }}
+                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+                  tab === 'login'
+                    ? 'bg-white text-black font-bold shadow-md'
+                    : 'text-[#929292] hover:text-white'
+                }`}
+              >
+                Doctor Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setTab('register_doctor'); setError(null); }}
+                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+                  tab === 'register_doctor'
+                    ? 'bg-white text-black font-bold shadow-md'
+                    : 'text-[#929292] hover:text-white'
+                }`}
+              >
+                Apply as a Doctor
+              </button>
+            </>
+          )}
         </div>
 
         {/* Demo Persona Quick-Fill Strip */}
         <div className="p-3 rounded-xl bg-white/[0.02] border border-[#292929] space-y-2">
           <div className="flex items-center justify-between text-[11px] font-mono text-[#777777]">
-            <span>Fast Evaluator Quick-Fill</span>
-            <span className="text-[#C0C0C0]">Pre-loaded Accounts</span>
+            <span>Quick Test Accounts</span>
+            <span className="text-[#C0C0C0]">Click to test:</span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => fillQuickDemo('patient')}
-              className="px-2.5 py-1.5 rounded-lg text-xs bg-[#111111] border border-[#292929] hover:border-white/40 text-white font-mono"
-            >
-              Demo Patient
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickDemo('doctor')}
-              className="px-2.5 py-1.5 rounded-lg text-xs bg-[#111111] border border-[#292929] hover:border-white/40 text-white font-mono"
-            >
-              Demo Doctor
-            </button>
-            <button
-              type="button"
-              onClick={() => fillQuickDemo('admin')}
-              className="px-2.5 py-1.5 rounded-lg text-xs bg-[#111111] border border-[#292929] hover:border-white/40 text-white font-mono"
-            >
-              Demo Admin
-            </button>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {currentPortal === 'patient' ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => fillQuickDemo('patient')}
+                  className="px-2.5 py-1.5 rounded-lg text-xs bg-[#111111] border border-[#292929] hover:border-white/40 text-white font-mono"
+                >
+                  Demo Patient
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fillQuickDemo('admin')}
+                  className="px-2.5 py-1.5 rounded-lg text-xs bg-[#111111] border border-[#292929] hover:border-white/40 text-white font-mono"
+                >
+                  Demo Admin
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fillQuickDemo('doctor')}
+                className="col-span-2 px-2.5 py-1.5 rounded-lg text-xs bg-[#111111] border border-[#292929] hover:border-white/40 text-white font-mono"
+              >
+                Demo Doctor (Dr. Priya Sharma)
+              </button>
+            )}
           </div>
         </div>
 
@@ -285,7 +348,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               disabled={loading}
               className="w-full py-3 rounded-xl text-sm font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all cursor-pointer flex items-center justify-center space-x-2 disabled:opacity-50"
             >
-              <span>{loading ? 'Authenticating...' : 'Sign In to urCure'}</span>
+              <span>{loading ? 'Signing In...' : currentPortal === 'doctor' ? 'Sign In as Doctor' : 'Sign In as Patient'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -392,7 +455,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   type="text"
                   value={pEmergencyName}
                   onChange={(e) => setPEmergencyName(e.target.value)}
-                  placeholder="Primary Next of Kin"
+                  placeholder="e.g. Parent, Spouse, or Friend"
                   className="w-full px-3 py-2 rounded-lg bg-[#111111] border border-[#292929] text-xs text-white focus:outline-none focus:border-white/50"
                 />
               </div>
@@ -417,7 +480,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 className="mt-1 rounded bg-[#111111] border-[#292929] text-white"
               />
               <label htmlFor="consentCheck" className="text-[11px] text-[#929292] leading-tight">
-                I accept the urCure Privacy Charter and consent to encrypted health records management. Identifiable clinical evaluations are strictly confidential.
+                I agree to keep my account private and safe. My visits and health notes stay strictly confidential between me and my doctor.
               </label>
             </div>
 
@@ -426,7 +489,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               disabled={loading || !pConsent}
               className="w-full py-3 rounded-xl text-sm font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all cursor-pointer disabled:opacity-50"
             >
-              {loading ? 'Creating Account...' : 'Complete Patient Registration'}
+              {loading ? 'Creating Account...' : 'Create My Patient Account'}
             </button>
           </form>
         )}
@@ -435,7 +498,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {tab === 'register_doctor' && (
           <form onSubmit={handleDoctorRegister} className="space-y-4 text-left">
             <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-[#C0C0C0]">
-              <span className="font-semibold text-white">DoH Verification Notice:</span> In compliance with UAE healthcare regulations, doctor accounts are audited by medical administration before patient bookings are activated.
+              <span className="font-semibold text-white">Doctor Safety Notice:</span> To keep all patients safe, each doctor account is verified by our medical board before patient bookings can start.
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -466,22 +529,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-[#777777]">Specialization *</label>
+                <label className="text-[11px] font-mono text-[#777777]">Doctor Field *</label>
                 <select
                   value={dSpec}
                   onChange={(e) => setDSpec(e.target.value)}
                   className="w-full px-2 py-2 rounded-lg bg-[#111111] border border-[#292929] text-xs text-white"
                 >
-                  <option value="Consultant Psychiatrist">Consultant Psychiatrist</option>
-                  <option value="Clinical Neuropsychologist">Clinical Neuropsychologist</option>
-                  <option value="Child & Adolescent Psychologist">Child & Adolescent Psychologist</option>
-                  <option value="Integrative Behavioral Physician">Integrative Behavioral Physician</option>
-                  <option value="Consultant Neurologist">Consultant Neurologist</option>
+                  <option value="Consultant Psychiatrist">Mind & Mood Doctor (Psychiatrist)</option>
+                  <option value="Clinical Neuropsychologist">Brain & Memory Doctor (Neuropsychologist)</option>
+                  <option value="Child & Adolescent Psychologist">Child & Teen Mood Doctor</option>
+                  <option value="Integrative Behavioral Physician">Stress & Wellness Doctor</option>
+                  <option value="Consultant Neurologist">Brain & Nerve Doctor (Neurologist)</option>
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-[#777777]">Medical License Number *</label>
+                <label className="text-[11px] font-mono text-[#777777]">Doctor License Number *</label>
                 <input
                   type="text"
                   required
@@ -495,7 +558,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-[#777777]">Qualifications *</label>
+                <label className="text-[11px] font-mono text-[#777777]">Degrees & University Training *</label>
                 <input
                   type="text"
                   required
@@ -521,7 +584,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-[#777777]">Consultation Fee (AED / 30m)</label>
+                <label className="text-[11px] font-mono text-[#777777]">Visit Fee (AED / 30 mins)</label>
                 <input
                   type="number"
                   value={dFee}
@@ -530,7 +593,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-[#777777]">Experience (Years)</label>
+                <label className="text-[11px] font-mono text-[#777777]">Years of Experience</label>
                 <input
                   type="number"
                   value={dExp}
@@ -556,9 +619,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               disabled={loading}
               className="w-full py-3 rounded-xl text-sm font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all cursor-pointer disabled:opacity-50"
             >
-              {loading ? 'Submitting Credentials...' : 'Submit Profile for Verification'}
+              {loading ? 'Submitting Application...' : 'Submit Doctor Application'}
             </button>
           </form>
+        )}
+
+        {/* Patient Portal Footer Notice */}
+        {currentPortal === 'patient' ? (
+          <div className="pt-4 text-center text-xs text-[#777777] border-t border-[#1F1F1F]">
+            <span>Your personal health information is private and encrypted.</span>
+          </div>
+        ) : (
+          <div className="pt-4 text-center text-xs text-[#777777] border-t border-[#1F1F1F]">
+            <span>Medical staff access is monitored and logged in compliance with UAE health regulations.</span>
+          </div>
         )}
 
       </div>

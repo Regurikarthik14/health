@@ -70,13 +70,13 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
       <div className="space-y-3">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#111111] border border-[#292929] text-xs font-mono text-[#C0C0C0]">
           <ShieldCheck className="w-3.5 h-3.5 text-white" />
-          <span>Department of Health (DoH) Licensed Specialists</span>
+          <span>Certified Real Doctors in Abu Dhabi</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">
-          Discover Your Preferred Doctor
+          Find the Right Doctor for You
         </h1>
         <p className="text-sm sm:text-base text-[#929292] max-w-2xl">
-          On urCure, you possess complete freedom of choice. Browse certified clinicians, compare verified credentials, and book direct 30-minute appointments.
+          Choose any doctor you like, see their fees and languages, and book a private 30-minute visit with no waiting in line.
         </p>
       </div>
 
@@ -90,7 +90,7 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
             type="text"
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
-            placeholder="Search doctors by name or clinical keywords..."
+            placeholder="Search doctors by name or what you need help with..."
             className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#111111] border border-[#292929] text-sm text-white placeholder-[#555] focus:outline-none focus:border-white/50"
           />
         </div>
@@ -100,29 +100,29 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
           
           {/* Specialization */}
           <div className="space-y-1">
-            <label className="text-[11px] font-mono text-[#777777] uppercase">Specialization</label>
+            <label className="text-[11px] font-mono text-[#777777] uppercase">Doctor Type</label>
             <select
               value={specialization}
               onChange={(e) => setSpecialization(e.target.value)}
               className="w-full px-3 py-2 rounded-lg bg-[#111111] border border-[#292929] text-xs text-white"
             >
-              <option value="">All Specializations</option>
-              <option value="Psychiatrist">Consultant Psychiatrist</option>
-              <option value="Neuropsychologist">Clinical Neuropsychologist</option>
-              <option value="Integrative">Integrative Physician</option>
-              <option value="Adolescent">Child & Adolescent Psychologist</option>
+              <option value="">All Doctor Types</option>
+              <option value="Psychiatrist">Mind & Mood (Psychiatrist)</option>
+              <option value="Neuropsychologist">Brain & Stress (Psychologist)</option>
+              <option value="Integrative">Sleep & Body Health</option>
+              <option value="Adolescent">Children & Teens</option>
             </select>
           </div>
 
           {/* Consultation Mode */}
           <div className="space-y-1">
-            <label className="text-[11px] font-mono text-[#777777] uppercase">Consultation Mode</label>
+            <label className="text-[11px] font-mono text-[#777777] uppercase">Visit Type</label>
             <select
               value={mode}
               onChange={(e) => setMode(e.target.value)}
               className="w-full px-3 py-2 rounded-lg bg-[#111111] border border-[#292929] text-xs text-white"
             >
-              <option value="">Online & In-Person</option>
+              <option value="">Video Call or Clinic Visit</option>
               <option value="online">Online Video Only</option>
               <option value="offline">In-Person Clinic Only</option>
             </select>
@@ -139,7 +139,7 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
               <option value="">Any Language</option>
               <option value="English">English</option>
               <option value="Arabic">Arabic</option>
-              <option value="Hindi">Hindi</option>
+              <option value="Hindi">Hindi / Urdu</option>
               <option value="French">French</option>
             </select>
           </div>
@@ -147,7 +147,7 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
           {/* Fee Slider */}
           <div className="space-y-1">
             <div className="flex justify-between text-[11px] font-mono text-[#777777]">
-              <span>Max Fee:</span>
+              <span>Max Price:</span>
               <span className="text-white font-bold">AED {maxFee}</span>
             </div>
             <input
@@ -157,7 +157,7 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
               step="10"
               value={maxFee}
               onChange={(e) => setMaxFee(Number(e.target.value))}
-              className="w-full accent-white bg-[#111111] mt-1"
+              className="w-full accent-white bg-[#111111] mt-1 cursor-pointer"
             />
           </div>
 
@@ -165,7 +165,7 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
 
         {/* Clear Filters */}
         <div className="flex items-center justify-between pt-2 text-xs font-mono text-[#777777]">
-          <span>Found {doctors.length} verified practitioners</span>
+          <span>Found {doctors.length} certified doctors</span>
           <button
             onClick={() => {
               setSearchName('');
@@ -186,12 +186,12 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
       {loading ? (
         <div className="py-20 text-center text-xs font-mono text-[#777777]">
           <RefreshCw className="w-5 h-5 mx-auto mb-2 animate-spin text-white" />
-          <span>Searching verified provider network...</span>
+          <span>Finding doctors...</span>
         </div>
       ) : doctors.length === 0 ? (
         <div className="p-12 text-center rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-3">
-          <p className="text-sm text-white">No doctors match your selected criteria.</p>
-          <p className="text-xs text-[#777777]">Try widening your fee filter or clearing search keywords.</p>
+          <p className="text-sm text-white">No doctors match your filters.</p>
+          <p className="text-xs text-[#777777]">Try raising your price limit or clearing the search box.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -214,13 +214,13 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
                       <h3 className="text-sm sm:text-base font-bold text-white tracking-tight truncate">
                         {doctor.full_name}
                       </h3>
-                      <span title="DoH Verified">
+                      <span title="Verified Doctor">
                         <ShieldCheck className="w-4 h-4 text-white shrink-0" />
                       </span>
                     </div>
                     <p className="text-xs text-[#929292] truncate">{doctor.specialization}</p>
                     <div className="flex items-center space-x-2 text-[11px] font-mono text-[#C0C0C0] mt-1">
-                      <span>{doctor.experience_years} Yrs</span>
+                      <span>{doctor.experience_years} Years Exp</span>
                       <span>•</span>
                       <span className="flex items-center space-x-0.5">
                         <Star className="w-3 h-3 text-white fill-white" />
@@ -251,14 +251,14 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
 
                   <div className="flex items-center space-x-2 text-white">
                     <Video className="w-3.5 h-3.5 text-[#C0C0C0]" />
-                    <span>Online & Offline Available</span>
+                    <span>Video Call & Clinic Visits Available</span>
                   </div>
                 </div>
 
                 {/* Fee display */}
                 <div className="flex items-center justify-between py-2 border-y border-[#292929] text-xs font-mono">
-                  <span className="text-[#777777]">Consultation Fee:</span>
-                  <span className="text-white font-bold">AED {doctor.consultation_fee} / 30m</span>
+                  <span className="text-[#777777]">Visit Fee:</span>
+                  <span className="text-white font-bold">AED {doctor.consultation_fee} / 30 mins</span>
                 </div>
 
               </div>
@@ -270,14 +270,14 @@ export const DoctorDiscovery: React.FC<DoctorDiscoveryProps> = ({
                   onClick={() => setViewingDoctor(doctor)}
                   className="py-2.5 rounded-lg text-xs font-semibold text-white bg-[#111111] border border-[#292929] hover:border-white/40 transition-all text-center"
                 >
-                  View Profile
+                  See Details
                 </button>
                 <button
                   type="button"
                   onClick={() => onSelectDoctorForBooking(doctor)}
                   className="py-2.5 rounded-lg text-xs font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all text-center"
                 >
-                  Book 30-Min
+                  Book Visit
                 </button>
               </div>
 

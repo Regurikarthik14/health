@@ -51,7 +51,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [confirmedAppointment, setConfirmedAppointment] = useState<Appointment | null>(null);
 
   // Booking fields
-  const [reason, setReason] = useState('Wellbeing evaluation and stress management');
+  const [reason, setReason] = useState('General check-in and doctor advice');
   const [notes, setNotes] = useState('');
 
   // Fetch doctors if not provided
@@ -83,7 +83,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       const res = await api.getDoctorSlots(selectedDoctor.id, selectedDate);
       setSlots(res.slots || []);
     } catch (err: any) {
-      setBookingError(err.message || 'Failed to fetch doctor availability slots.');
+      setBookingError(err.message || 'Could not load available doctor times. Please try again.');
     } finally {
       setLoadingSlots(false);
     }
@@ -129,7 +129,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
     } catch (err: any) {
       // Slot collision or error
-      setBookingError(err.message || 'This time slot was just secured by another patient. Please choose an alternate slot.');
+      setBookingError(err.message || 'This time was just booked by someone else. Please pick another time.');
       // Refresh slots immediately to show new availability
       fetchSlots();
     } finally {
@@ -150,8 +150,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <CalendarPlus className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">Smart 30-Min Appointment Booking</h3>
-              <p className="text-[11px] font-mono text-[#777777]">Exclusive Atomic Slot Locking</p>
+              <h3 className="text-lg font-bold text-white tracking-tight">Book a 30-Minute Visit</h3>
+              <p className="text-[11px] font-mono text-[#777777]">Private 1-on-1 Time Reserved Just For You</p>
             </div>
           </div>
           <button
@@ -173,18 +173,18 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
               <div>
                 <span className="text-[11px] font-mono uppercase tracking-widest text-[#C0C0C0]">
-                  Exclusive Slot Reserved
+                  Time Reserved Successfully
                 </span>
-                <h4 className="text-2xl font-bold text-white mt-1">Appointment Confirmed</h4>
+                <h4 className="text-2xl font-bold text-white mt-1">Your Visit is Booked!</h4>
                 <p className="text-xs text-[#929292] font-mono mt-0.5">
-                  Reference: <strong className="text-white">{confirmedAppointment.booking_reference}</strong>
+                  Booking Code: <strong className="text-white">{confirmedAppointment.booking_reference}</strong>
                 </p>
               </div>
 
               {/* Appointment summary details */}
               <div className="p-4 rounded-xl bg-[#050505] border border-[#292929] text-xs font-mono space-y-2 text-left">
                 <div className="flex justify-between py-1 border-b border-[#1A1A1A]">
-                  <span className="text-[#777777]">Practitioner:</span>
+                  <span className="text-[#777777]">Doctor:</span>
                   <span className="text-white font-medium">{confirmedAppointment.doctor_name} ({confirmedAppointment.doctor_specialization})</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-[#1A1A1A]">
@@ -194,18 +194,18 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-[#1A1A1A]">
-                  <span className="text-[#777777]">Consultation Mode:</span>
-                  <span className="text-white uppercase font-bold">{confirmedAppointment.consultation_mode}</span>
+                  <span className="text-[#777777]">How You Will Meet:</span>
+                  <span className="text-white uppercase font-bold">{confirmedAppointment.consultation_mode === 'online' ? 'Online Video' : 'In-Person Clinic'}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-[#1A1A1A]">
                   <span className="text-[#777777]">Status:</span>
                   <span className="text-white uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded">
-                    {confirmedAppointment.status}
+                    {confirmedAppointment.status === 'confirmed' ? 'Confirmed' : confirmedAppointment.status}
                   </span>
                 </div>
                 <div className="pt-1">
                   <span className="text-[#777777] block mb-1">
-                    {confirmedAppointment.consultation_mode === 'online' ? 'Secure Telehealth Link:' : 'Clinic Location:'}
+                    {confirmedAppointment.consultation_mode === 'online' ? 'Private Video Call Link:' : 'Clinic Address:'}
                   </span>
                   <p className="text-white font-sans text-xs bg-[#111111] p-2 rounded border border-[#292929] break-all">
                     {confirmedAppointment.consultation_mode === 'online'
@@ -223,14 +223,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all flex items-center justify-center space-x-2"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Add to Calendar (.ICS)</span>
+                  <span>Save to My Calendar</span>
                 </a>
 
                 <button
                   onClick={onClose}
                   className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-[#111111] border border-[#292929] hover:border-white/40 transition-all"
                 >
-                  Close & View Appointments
+                  Done & View My Visits
                 </button>
               </div>
 
@@ -243,7 +243,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             
             {/* Step 1: Doctor Selection */}
             <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-wider text-[#777777]">1. Select Practitioner</label>
+              <label className="text-xs font-mono uppercase tracking-wider text-[#777777]">1. Choose Your Doctor</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {(doctors.length > 0 ? doctors : (selectedDoctor ? [selectedDoctor] : [])).map((doc) => {
                   const isSelected = selectedDoctor?.id === doc.id;
@@ -281,7 +281,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               
               {/* Consultation Mode */}
               <div className="space-y-2">
-                <label className="text-xs font-mono uppercase tracking-wider text-[#777777]">2. Consultation Mode</label>
+                <label className="text-xs font-mono uppercase tracking-wider text-[#777777]">2. How Would You Like to Meet?</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -313,7 +313,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
               {/* Consultation Date */}
               <div className="space-y-2">
-                <label className="text-xs font-mono uppercase tracking-wider text-[#777777]">3. Appointment Date</label>
+                <label className="text-xs font-mono uppercase tracking-wider text-[#777777]">3. Pick a Date</label>
                 <div className="relative">
                   <input
                     type="date"
@@ -331,7 +331,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-mono uppercase tracking-wider text-[#777777]">
-                  4. Available 30-Minute Time Slots
+                  4. Choose a 30-Minute Time
                 </label>
                 <button
                   type="button"
@@ -339,17 +339,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   className="flex items-center space-x-1 text-[11px] font-mono text-[#929292] hover:text-white"
                 >
                   <RefreshCw className={`w-3 h-3 ${loadingSlots ? 'animate-spin' : ''}`} />
-                  <span>Refresh Availability</span>
+                  <span>Refresh Times</span>
                 </button>
               </div>
 
               {loadingSlots ? (
                 <div className="p-8 text-center text-xs font-mono text-[#777777] bg-[#111111] rounded-xl border border-[#292929]">
-                  Evaluating doctor calendar & locking status...
+                  Checking doctor schedule...
                 </div>
               ) : slots.length === 0 ? (
                 <div className="p-6 text-center text-xs text-[#929292] bg-[#111111] rounded-xl border border-[#292929]">
-                  No working hours configured for this day. Please select another date.
+                  No open times on this day. Please pick another date.
                 </div>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
@@ -389,12 +389,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             {/* Reason & Notes */}
             <div className="space-y-3 pt-2">
               <div className="space-y-1">
-                <label className="text-[11px] font-mono text-[#777777]">Consultation Reason</label>
+                <label className="text-[11px] font-mono text-[#777777]">Reason for Visit</label>
                 <input
                   type="text"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Primary reason for appointment"
+                  placeholder="What would you like to talk about with the doctor?"
                   className="w-full px-3 py-2 rounded-lg bg-[#111111] border border-[#292929] text-xs text-white"
                 />
               </div>
@@ -416,13 +416,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               className="w-full py-3.5 rounded-xl text-sm font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all cursor-pointer flex items-center justify-center space-x-2 disabled:opacity-40"
             >
               <span>
-                {bookingLoading ? 'Acquiring Exclusive Slot Lock...' : `Confirm & Reserve ${selectedSlot || 'Slot'} Exclusively`}
+                {bookingLoading ? 'Saving your time...' : `Book My Visit for ${selectedSlot || 'this time'}`}
               </span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <p className="text-[11px] text-[#666666] font-mono text-center">
-              Exclusive 30-minute locking ensures no duplicate bookings. Free cancellation available up to 4 hours prior.
+              Your 30 minutes are fully reserved for you. Free cancellation anytime up to 4 hours before your visit.
             </p>
 
           </div>

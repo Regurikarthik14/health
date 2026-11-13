@@ -70,7 +70,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   }, []);
 
   const handleCancelAppointment = async (appointmentId: number) => {
-    if (!window.confirm('Are you sure you want to cancel this appointment? Your reserved 30-minute slot will be released.')) return;
+    if (!window.confirm('Are you sure you want to cancel this visit? Your 30-minute time will be opened for others.')) return;
     setActionLoading(true);
     try {
       await api.cancelAppointment(appointmentId, 'Patient requested cancellation');
@@ -88,13 +88,13 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
 
   const sidebarItems = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'wellbeing', label: 'My Wellbeing', icon: Brain },
-    { id: 'ai', label: 'AI Assistant', icon: Bot },
+    { id: 'wellbeing', label: 'Check My Mood', icon: Brain },
+    { id: 'ai', label: 'AI Helper', icon: Bot },
     { id: 'doctors', label: 'Find Doctors', icon: Stethoscope },
-    { id: 'book', label: 'Book Appointment', icon: CalendarPlus },
-    { id: 'appointments', label: 'My Appointments', icon: Calendar },
-    { id: 'records', label: 'Health Records', icon: FileText },
-    { id: 'emergency', label: 'Emergency Support', icon: ShieldAlert },
+    { id: 'book', label: 'Book a Visit', icon: CalendarPlus },
+    { id: 'appointments', label: 'My Visits', icon: Calendar },
+    { id: 'records', label: 'Doctor Notes', icon: FileText },
+    { id: 'emergency', label: 'Emergency Help', icon: ShieldAlert },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -158,12 +158,12 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
           {/* Welcome Banner */}
           <div className="p-6 sm:p-8 rounded-2xl bg-[#0B0B0B] border border-[#292929] relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="space-y-2">
-              <span className="text-xs font-mono uppercase text-[#777777]">Patient Portal</span>
+              <span className="text-xs font-mono uppercase text-[#777777]">My Patient Dashboard</span>
               <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                 Welcome back, {user ? user.full_name.split(' ')[0] : 'Zayn'}.
               </h2>
               <p className="text-xs sm:text-sm text-[#929292] max-w-lg">
-                Your private health dashboard. Review your 30-minute consultations, monitor longitudinal wellbeing metrics, and access encrypted records.
+                Your private home. Check your upcoming visits, see your mood check scores, and read notes from your doctor.
               </p>
             </div>
 
@@ -172,7 +172,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
               className="px-5 py-3 rounded-xl text-xs font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all flex items-center space-x-2 shrink-0 cursor-pointer"
             >
               <CalendarPlus className="w-4 h-4" />
-              <span>Book Appointment</span>
+              <span>Book a Visit</span>
             </button>
           </div>
 
@@ -182,39 +182,39 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
             {/* Metric 1 */}
             <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-[#777777]">
-                <span>Upcoming Appointments</span>
+                <span>Upcoming Visits</span>
                 <Clock className="w-4 h-4 text-white" />
               </div>
               <div className="text-3xl font-bold text-white font-mono">
                 {upcomingAppointments.length}
               </div>
-              <p className="text-[11px] text-[#929292]">Exclusive 30-min confirmed slots</p>
+              <p className="text-[11px] text-[#929292]">Confirmed 30-minute visits</p>
             </div>
 
             {/* Metric 2 */}
             <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-[#777777]">
-                <span>Latest PHQ-9 Score</span>
+                <span>Latest Mood Check</span>
                 <Brain className="w-4 h-4 text-white" />
               </div>
               <div className="text-3xl font-bold text-white font-mono">
                 {latestAssessment ? `${latestAssessment.score} / 27` : '3 / 27'}
               </div>
               <p className="text-[11px] text-[#929292]">
-                Classification: <strong className="text-white uppercase">{latestAssessment ? latestAssessment.severity_level : 'Minimal'}</strong>
+                Result: <strong className="text-white uppercase">{latestAssessment ? latestAssessment.severity_level : 'Minimal'}</strong>
               </p>
             </div>
 
             {/* Metric 3 */}
             <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-[#777777]">
-                <span>Clinical Records</span>
+                <span>Doctor Notes</span>
                 <FileText className="w-4 h-4 text-white" />
               </div>
               <div className="text-3xl font-bold text-white font-mono">
                 {clinicalRecords.length + 1}
               </div>
-              <p className="text-[11px] text-[#929292]">Encrypted notes & summaries</p>
+              <p className="text-[11px] text-[#929292]">Private visit summaries</p>
             </div>
 
           </div>
@@ -225,10 +225,10 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
               <div className="flex items-center justify-between pb-3 border-b border-[#292929]">
                 <div className="flex items-center space-x-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
-                  <h3 className="text-sm font-semibold text-white">Next Scheduled Consultation</h3>
+                  <h3 className="text-sm font-semibold text-white">Your Next Visit</h3>
                 </div>
                 <span className="text-xs font-mono text-[#C0C0C0]">
-                  Ref: {upcomingAppointments[0].booking_reference}
+                  Booking Code: {upcomingAppointments[0].booking_reference}
                 </span>
               </div>
 
@@ -243,7 +243,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                     <span>•</span>
                     <span>{upcomingAppointments[0].start_time} – {upcomingAppointments[0].end_time}</span>
                     <span>•</span>
-                    <span className="uppercase text-[#C0C0C0]">{upcomingAppointments[0].consultation_mode}</span>
+                    <span className="uppercase text-[#C0C0C0]">{upcomingAppointments[0].consultation_mode === 'online' ? 'Online Video' : 'In-Person Clinic'}</span>
                   </div>
                 </div>
 
@@ -256,11 +256,11 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                       className="px-4 py-2.5 rounded-xl text-xs font-semibold text-black bg-white hover:bg-[#EAEAEA] flex items-center space-x-1.5"
                     >
                       <Video className="w-3.5 h-3.5" />
-                      <span>Launch Telehealth Room</span>
+                      <span>Join Video Call</span>
                     </a>
                   ) : (
                     <div className="text-xs font-mono text-[#929292] p-2 bg-[#050505] rounded-lg border border-[#222]">
-                      Clinic: {upcomingAppointments[0].clinic_address || 'Abu Dhabi Clinic Hub'}
+                      Clinic Address: {upcomingAppointments[0].clinic_address || 'Abu Dhabi Clinic Hub'}
                     </div>
                   )}
 
@@ -281,8 +281,8 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
           <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#292929] space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-[#292929]">
               <div>
-                <h3 className="text-base font-semibold text-white">All Booked Appointments</h3>
-                <p className="text-xs text-[#929292]">Real-time status, calendar export, and rescheduling</p>
+                <h3 className="text-base font-semibold text-white">All Scheduled Visits</h3>
+                <p className="text-xs text-[#929292]">Check your visit times, save to your calendar, or cancel</p>
               </div>
               <button
                 onClick={loadDashboardData}
@@ -295,7 +295,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
 
             {appointments.length === 0 ? (
               <div className="p-8 text-center text-xs font-mono text-[#777] bg-[#111] rounded-xl border border-[#222]">
-                No appointments booked yet. Click "Book Appointment" to secure your preferred 30-minute slot.
+                No visits booked yet. Click "Book a Visit" to pick a time with a doctor.
               </div>
             ) : (
               <div className="space-y-3">
@@ -314,13 +314,13 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                             ? 'bg-white/[0.04] text-[#888] border-[#333]'
                             : 'bg-white/[0.02] text-[#555] border-[#222]'
                         }`}>
-                          {app.status}
+                          {app.status === 'confirmed' ? 'Confirmed' : app.status}
                         </span>
                       </div>
                       <p className="text-xs text-[#929292] font-mono">
-                        {app.appointment_date} • {app.start_time} – {app.end_time} ({app.consultation_mode.toUpperCase()})
+                        {app.appointment_date} • {app.start_time} – {app.end_time} ({app.consultation_mode === 'online' ? 'Online Video' : 'In-Person Clinic'})
                       </p>
-                      <p className="text-[11px] font-mono text-[#777]">Ref: {app.booking_reference}</p>
+                      <p className="text-[11px] font-mono text-[#777]">Booking Code: {app.booking_reference}</p>
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -328,10 +328,10 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                         href={`/api/appointments/${app.booking_reference}/calendar.ics`}
                         download
                         className="px-3 py-1.5 rounded-lg text-xs font-mono bg-[#050505] border border-[#292929] hover:border-white text-white flex items-center space-x-1"
-                        title="Download .ICS"
+                        title="Download Calendar"
                       >
                         <Download className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Calendar</span>
+                        <span className="hidden sm:inline">Save to Calendar</span>
                       </a>
 
                       {(app.status === 'confirmed' || app.status === 'rescheduled') && (
@@ -340,7 +340,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                           onClick={() => handleCancelAppointment(app.id)}
                           className="px-3 py-1.5 rounded-lg text-xs font-mono bg-white/[0.04] border border-[#292929] hover:border-white/50 text-[#929292] hover:text-white"
                         >
-                          Cancel Slot
+                          Cancel Visit
                         </button>
                       )}
                     </div>
@@ -355,22 +355,22 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
             <div className="flex items-center justify-between pb-3 border-b border-[#292929]">
               <div className="flex items-center space-x-2">
                 <FileText className="w-4 h-4 text-white" />
-                <h3 className="text-sm font-semibold text-white">Private Clinical Records</h3>
+                <h3 className="text-sm font-semibold text-white">Private Doctor Notes</h3>
               </div>
-              <span className="text-[11px] font-mono text-[#777]">Restricted Access</span>
+              <span className="text-[11px] font-mono text-[#777]">Only visible to you & your doctor</span>
             </div>
 
             <div className="space-y-3">
               <div className="p-4 rounded-xl bg-[#111111] border border-[#292929] space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-white">Consultation Summary • Dr. Priya Sharma</span>
+                  <span className="font-semibold text-white">Doctor Visit Summary • Dr. Priya Sharma</span>
                   <span className="text-mono text-[#777]">Nov 2026</span>
                 </div>
                 <p className="text-xs text-[#929292] leading-relaxed">
-                  "Patient demonstrated positive response to cognitive sleep scheduling. Recommendation to maintain morning sunlight exposure and continuing box breathing 2x daily."
+                  "Patient is sleeping better. Advice: Get natural morning sunlight and practice calm breathing twice a day."
                 </p>
                 <div className="pt-1 text-[11px] font-mono text-[#C0C0C0]">
-                  Follow-up: Scheduled • Status: Active
+                  Next Visit: Scheduled • Status: Active
                 </div>
               </div>
             </div>

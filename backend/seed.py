@@ -417,15 +417,15 @@ def seed_database(app):
         # 8. Notifications
         notif1 = Notification(
             user_id=patient_user.id,
-            title='Upcoming Consultation Today',
-            message=f"Reminder: You have an online consultation with Dr. Priya Sharma at 09:00 AM.",
+            title='Upcoming Visit Today',
+            message=f"Reminder: You have an online video visit with Dr. Priya Sharma at 09:00 AM.",
             notification_type='appointment',
             action_link='/appointments/URC-2026-A1090'
         )
         notif2 = Notification(
             user_id=patient_user.id,
-            title='Wellbeing Score Improved',
-            message='Your latest PHQ-9 score dropped from 6 (Mild) to 3 (Minimal). Great progress!',
+            title='Mood Score Improved',
+            message='Your latest mood check score improved from 6 (Mild) to 3 (Minimal). Great progress!',
             notification_type='assessment',
             action_link='/wellbeing'
         )

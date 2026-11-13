@@ -82,7 +82,7 @@ export const DoctorProfileModal: React.FC<DoctorProfileModalProps> = ({
 
         {/* Bio */}
         <div className="space-y-2">
-          <span className="text-xs font-mono uppercase text-[#777777]">Professional Biography</span>
+          <span className="text-xs font-mono uppercase text-[#777777]">About This Doctor</span>
           <p className="text-xs sm:text-sm text-[#F5F5F5] leading-relaxed bg-[#111111] p-4 rounded-xl border border-[#292929]">
             {profileData.bio}
           </p>
@@ -90,21 +90,21 @@ export const DoctorProfileModal: React.FC<DoctorProfileModalProps> = ({
 
         {/* Verified Credentials */}
         <div className="space-y-2">
-          <span className="text-xs font-mono uppercase text-[#777777]">Licensing & Credentials</span>
+          <span className="text-xs font-mono uppercase text-[#777777]">Official Doctor License</span>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="p-3.5 rounded-xl bg-[#111111] border border-[#292929] space-y-1">
               <div className="flex items-center space-x-1.5 text-xs text-white font-medium">
                 <FileCheck className="w-4 h-4 text-[#C0C0C0]" />
-                <span>Medical License:</span>
+                <span>Doctor License Number:</span>
               </div>
               <p className="text-xs font-mono text-[#C0C0C0] pl-5">{profileData.license_number}</p>
-              <p className="text-[10px] text-[#777777] pl-5">Department of Health (DoH) Abu Dhabi</p>
+              <p className="text-[10px] text-[#777777] pl-5">Certified by Abu Dhabi Health Authority</p>
             </div>
 
             <div className="p-3.5 rounded-xl bg-[#111111] border border-[#292929] space-y-1">
               <div className="flex items-center space-x-1.5 text-xs text-white font-medium">
                 <Award className="w-4 h-4 text-[#C0C0C0]" />
-                <span>Qualifications:</span>
+                <span>Degrees & Training:</span>
               </div>
               <p className="text-xs text-[#C0C0C0] pl-5 line-clamp-2">{profileData.qualifications}</p>
             </div>
@@ -116,7 +116,7 @@ export const DoctorProfileModal: React.FC<DoctorProfileModalProps> = ({
           <div className="p-3.5 rounded-xl bg-[#111111] border border-[#292929] space-y-1 text-xs">
             <div className="flex items-center space-x-1.5 text-white font-medium">
               <MapPin className="w-4 h-4 text-[#C0C0C0]" />
-              <span>Clinic Location:</span>
+              <span>Clinic Office:</span>
             </div>
             <p className="text-[#C0C0C0] pl-5">{profileData.clinic_name}</p>
             <p className="text-[#777777] pl-5 text-[11px]">{profileData.clinic_address}</p>
@@ -125,7 +125,7 @@ export const DoctorProfileModal: React.FC<DoctorProfileModalProps> = ({
           <div className="p-3.5 rounded-xl bg-[#111111] border border-[#292929] space-y-1 text-xs">
             <div className="flex items-center space-x-1.5 text-white font-medium">
               <Globe className="w-4 h-4 text-[#C0C0C0]" />
-              <span>Consultation Languages:</span>
+              <span>Languages Spoken:</span>
             </div>
             <p className="text-[#C0C0C0] pl-5">
               {Array.isArray(profileData.languages) ? profileData.languages.join(', ') : profileData.languages}
@@ -141,7 +141,7 @@ export const DoctorProfileModal: React.FC<DoctorProfileModalProps> = ({
         {/* Fee & Book CTA */}
         <div className="p-4 rounded-xl bg-white/[0.04] border border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <span className="text-[11px] font-mono text-[#777777] uppercase">30-Minute Consultation Fee</span>
+            <span className="text-[11px] font-mono text-[#777777] uppercase">Fee for 30-Minute Visit</span>
             <div className="text-xl font-bold text-white font-mono">
               AED {profileData.consultation_fee}
             </div>
@@ -154,7 +154,7 @@ export const DoctorProfileModal: React.FC<DoctorProfileModalProps> = ({
             }}
             className="w-full sm:w-auto px-6 py-3 rounded-xl text-xs font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all flex items-center justify-center space-x-2"
           >
-            <span>Book 30-Minute Slot</span>
+            <span>Book a 30-Minute Visit</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
