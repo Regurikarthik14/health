@@ -20,14 +20,17 @@ interface QuickFeatureDockProps {
   onNavigate: (view: string) => void;
   onOpenSOS: () => void;
   onOpenBooking: () => void;
+  onOpenAuth?: (tab?: 'login' | 'register_patient' | 'register_doctor', portalMode?: 'patient' | 'doctor') => void;
 }
 
 export const QuickFeatureDock: React.FC<QuickFeatureDockProps> = ({
   currentView,
   onNavigate,
-  onOpenSOS
+  onOpenSOS,
+  onOpenBooking: _onOpenBooking,
+  onOpenAuth
 }) => {
-  const { user, isDoctor, isAdmin, isPatient, switchRoleDemo } = useAuth();
+  const { user, isDoctor, isAdmin, logout } = useAuth();
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const roleMenuRef = useRef<HTMLDivElement>(null);
 
@@ -118,65 +121,82 @@ export const QuickFeatureDock: React.FC<QuickFeatureDockProps> = ({
           <span>SOS</span>
         </button>
 
-        {/* Demo Persona Switcher Dropdown */}
+        {/* User Account / Role Menu */}
         <div className="relative" ref={roleMenuRef}>
           <button
             onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-            className="flex items-center space-x-1 px-2.5 py-2 rounded-xl text-xs font-mono bg-[#141414] border border-[#2b2b2b] text-[#A0A0A0] hover:text-white hover:border-white/30 transition-all cursor-pointer whitespace-nowrap"
-            title="Switch Account"
+            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-mono bg-[#141414] border border-[#2b2b2b] text-[#A0A0A0] hover:text-white hover:border-white/30 transition-all cursor-pointer whitespace-nowrap"
+            title="Account Menu"
           >
-            <UserCheck className="w-3.5 h-3.5 text-[#888]" />
-            <span className="capitalize hidden md:inline">{user ? user.role : 'Guest'}</span>
+            <UserCheck className="w-3.5 h-3.5 text-white" />
+            <span className="capitalize hidden md:inline font-semibold">{user ? user.role : 'Account'}</span>
             <ChevronDown className="w-3 h-3 text-[#666]" />
           </button>
 
           {roleMenuOpen && (
             <div className="absolute bottom-full right-0 mb-3 w-64 rounded-xl bg-[#0E0E0E] border border-[#2a2a2a] shadow-2xl p-2 z-50 backdrop-blur-2xl">
-              <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#777777] border-b border-[#222222] flex items-center justify-between">
-                <span>Switch Test Account</span>
-                <span className="text-[9px] font-mono text-[#555]">Instant</span>
-              </div>
-              
-              <div className="pt-1.5 space-y-1">
-                <button
-                  onClick={() => { switchRoleDemo('patient'); setRoleMenuOpen(false); onNavigate('patient-dashboard'); }}
-                  className={`w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between transition-all cursor-pointer ${
-                    isPatient ? 'bg-white/15 text-white font-medium' : 'text-[#929292] hover:bg-white/[0.05] hover:text-white'
-                  }`}
-                >
-                  <div>
-                    <div className="font-semibold text-white">Patient (Zayn)</div>
-                    <div className="text-[11px] text-[#777]">See visits & mood notes</div>
+              {user ? (
+                <div className="space-y-2">
+                  <div className="px-3 py-2 border-b border-[#222222]">
+                    <div className="text-xs font-bold text-white truncate">{user.full_name}</div>
+                    <div className="text-[11px] font-mono text-[#777] truncate">{user.email}</div>
+                    <div className="mt-1">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono uppercase bg-white/10 text-white border border-white/20">
+                        {user.role}
+                      </span>
+                    </div>
                   </div>
-                  {isPatient && <Check className="w-3.5 h-3.5 text-white" />}
-                </button>
 
-                <button
-                  onClick={() => { switchRoleDemo('doctor'); setRoleMenuOpen(false); onNavigate('doctor-dashboard'); }}
-                  className={`w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between transition-all cursor-pointer ${
-                    isDoctor ? 'bg-white/15 text-white font-medium' : 'text-[#929292] hover:bg-white/[0.05] hover:text-white'
-                  }`}
-                >
-                  <div>
-                    <div className="font-semibold text-white">Doctor (Dr. Sharma)</div>
-                    <div className="text-[11px] text-[#777]">See patient visits & video calls</div>
-                  </div>
-                  {isDoctor && <Check className="w-3.5 h-3.5 text-white" />}
-                </button>
+                  <button
+                    onClick={() => {
+                      setRoleMenuOpen(false);
+                      onNavigate(getPortalView());
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs rounded-lg flex items-center space-x-2 text-white hover:bg-white/10 transition-all cursor-pointer font-medium"
+                  >
+                    <LayoutDashboard className="w-3.5 h-3.5 text-white" />
+                    <span>Go to My Dashboard</span>
+                  </button>
 
-                <button
-                  onClick={() => { switchRoleDemo('admin'); setRoleMenuOpen(false); onNavigate('admin-dashboard'); }}
-                  className={`w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between transition-all cursor-pointer ${
-                    isAdmin ? 'bg-white/15 text-white font-medium' : 'text-[#929292] hover:bg-white/[0.05] hover:text-white'
-                  }`}
-                >
-                  <div>
-                    <div className="font-semibold text-white">Admin (Dr. Sarah)</div>
-                    <div className="text-[11px] text-[#777]">Check doctor licenses & website safety</div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setRoleMenuOpen(false);
+                      onNavigate('landing');
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs rounded-lg flex items-center space-x-2 text-red-400 hover:bg-red-950/40 transition-all cursor-pointer font-medium"
+                  >
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#777] border-b border-[#222]">
+                    Sign In or Register
                   </div>
-                  {isAdmin && <Check className="w-3.5 h-3.5 text-white" />}
-                </button>
-              </div>
+                  <button
+                    onClick={() => {
+                      setRoleMenuOpen(false);
+                      if (onOpenAuth) onOpenAuth('login', 'patient');
+                      else onNavigate('landing');
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs rounded-lg text-white hover:bg-white/10 transition-all cursor-pointer"
+                  >
+                    <div className="font-semibold text-white">Patient Portal</div>
+                    <div className="text-[11px] text-[#777]">Sign in, book visits, track blocks</div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setRoleMenuOpen(false);
+                      onNavigate('doctor-gateway');
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs rounded-lg text-white hover:bg-white/10 transition-all cursor-pointer"
+                  >
+                    <div className="font-semibold text-white">Doctor Gateway</div>
+                    <div className="text-[11px] text-[#777]">Doctor login & registration</div>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

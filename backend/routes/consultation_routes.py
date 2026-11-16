@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, timezone
 from models import db, Consultation, Appointment, FollowUp, ClinicalRecord, User, Notification, AuditLog
+from mongo_service import mongo_service
 
 consultation_bp = Blueprint('consultations', __name__)
 
@@ -127,6 +128,12 @@ def complete_consultation(appointment_id):
 
     db.session.commit()
 
+    # Sync to MongoDB Atlas for cloud persistence
+    mongo_service.save_consultation(consultation.to_dict())
+    mongo_service.save_clinical_record(clinical_rec.to_dict())
+    mongo_service.save_appointment(appointment.to_dict())
+    mongo_service.log_audit(user.id, 'COMPLETE_CONSULTATION', 'Consultation', f"Doctor finalized consultation for appointment {appointment.booking_reference}", request.remote_addr or '127.0.0.1')
+
     return jsonify({
         'message': 'Consultation finalized and clinical record logged.',
         'consultation': consultation.to_dict(),
@@ -140,13 +147,75 @@ def get_clinical_records():
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
 
+    if not user:
+        return jsonify({'records': []}), 404
+
     if user.patient_profile:
         records = ClinicalRecord.query.filter_by(patient_id=user.patient_profile.id)\
             .order_by(ClinicalRecord.created_at.desc()).all()
-        return jsonify({'records': [r.to_dict() for r in records]}), 200
+        result = [r.to_dict() for r in records]
+
+        # Check MongoDB Atlas fallback if local list is empty
+        if not result:
+            mongo_records = mongo_service.get_patient_clinical_records(user.patient_profile.id)
+            if mongo_records:
+                result = mongo_records
+
+        return jsonify({'records': result}), 200
     elif user.doctor_profile:
         records = ClinicalRecord.query.filter_by(doctor_id=user.doctor_profile.id)\
             .order_by(ClinicalRecord.created_at.desc()).all()
         return jsonify({'records': [r.to_dict() for r in records]}), 200
     else:
         return jsonify({'records': []}), 200
+
+
+@consultation_bp.route('/records', methods=['POST'])
+@jwt_required()
+def add_clinical_record():
+    """Allows verified doctor to add a clinical note, diagnosis, or prescription for a patient."""
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or not user.doctor_profile:
+        return jsonify({'error': 'Only licensed medical providers can issue clinical notes.'}), 403
+
+    if not user.doctor_profile.is_verified:
+        return jsonify({'error': 'Your medical profile is pending verification. Please contact administration.'}), 403
+
+    data = request.get_json() or {}
+    patient_id = data.get('patient_id')
+    title = data.get('title', 'Clinical Visit Note')
+    details = data.get('details', '')
+    record_type = data.get('record_type', 'consultation_note')
+
+    if not patient_id or not details:
+        return jsonify({'error': 'Patient ID and note details are required.'}), 400
+
+    clinical_rec = ClinicalRecord(
+        patient_id=patient_id,
+        doctor_id=user.doctor_profile.id,
+        record_type=record_type,
+        title=f"{title} • Dr. {user.full_name}",
+        details=details
+    )
+    db.session.add(clinical_rec)
+
+    audit = AuditLog(
+        user_id=user.id,
+        action='ADD_CLINICAL_RECORD',
+        resource='ClinicalRecord',
+        details=f"Doctor added {record_type} for patient {patient_id}",
+        ip_address=request.remote_addr or '127.0.0.1'
+    )
+    db.session.add(audit)
+    db.session.commit()
+
+    # Sync to MongoDB Atlas
+    mongo_service.save_clinical_record(clinical_rec.to_dict())
+    mongo_service.log_audit(user.id, 'ADD_CLINICAL_RECORD', 'ClinicalRecord', f"Doctor added {record_type} for patient {patient_id}", request.remote_addr or '127.0.0.1')
+
+    return jsonify({
+        'message': 'Clinical note saved successfully.',
+        'record': clinical_rec.to_dict()
+    }), 201

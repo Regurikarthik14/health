@@ -345,6 +345,7 @@ const MainApp: React.FC = () => {
           setBookingDoctor(null);
           setBookingModalOpen(true);
         }}
+        onOpenAuth={handleOpenAuth}
       />
 
       {/* Global Modals */}

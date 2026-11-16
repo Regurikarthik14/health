@@ -122,15 +122,19 @@ export const DoctorDashboard: React.FC = () => {
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-xs font-mono uppercase text-[#777777]">Doctor Portal</span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-white/10 text-white border border-white/20">
-              {stats?.is_verified ? 'Licensed & Verified Doctor' : 'Verification In Review'}
+            <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
+              stats?.is_verified
+                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+            }`}>
+              {stats?.is_verified ? '✓ Licensed & Verified Doctor' : '⏳ Verification Under Review'}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
-            {user ? user.full_name : 'Dr. Priya Sharma'}
+            {user ? user.full_name : 'Medical Doctor'}
           </h1>
           <p className="text-xs text-[#929292] font-mono mt-0.5">
-            License: {stats?.license_number || 'DOH-MD-2018-8472'} • Rating: {stats?.rating || 4.96} ★
+            License: {stats?.license_number || (user as any)?.license_number || 'Pending Review'} • Rating: {stats?.rating || 'New Provider'}
           </p>
         </div>
 
@@ -150,6 +154,19 @@ export const DoctorDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Verification Notice Banner */}
+      {!stats?.is_verified && (
+        <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-700/50 flex items-start space-x-3 text-left">
+          <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h4 className="text-xs font-bold text-amber-200">Doctor Profile Pending Verification</h4>
+            <p className="text-xs text-amber-300/80 leading-relaxed">
+              Your medical license is undergoing review by the urCure Clinical Compliance Board. To protect patient safety, only verified healthcare professionals can receive and confirm patient appointments.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* KPI Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
@@ -160,19 +177,19 @@ export const DoctorDashboard: React.FC = () => {
 
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
           <span className="text-[11px] font-mono text-[#777777] uppercase">Upcoming Visits</span>
-          <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.upcoming_count || 3}</div>
+          <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.upcoming_count ?? 0}</div>
           <p className="text-[10px] text-[#929292]">Confirmed patient visits</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
           <span className="text-[11px] font-mono text-[#777777] uppercase">Completed Visits</span>
-          <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.completed_count || 12}</div>
+          <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.completed_count ?? 0}</div>
           <p className="text-[10px] text-[#929292]">Saved patient notes</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-1">
           <span className="text-[11px] font-mono text-[#777777] uppercase">Total Patients</span>
-          <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.total_patients || 18}</div>
+          <div className="text-2xl sm:text-3xl font-bold text-white font-mono">{stats?.total_patients ?? 0}</div>
           <p className="text-[10px] text-[#929292]">Patients cared for</p>
         </div>
       </div>

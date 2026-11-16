@@ -146,17 +146,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const fillQuickDemo = (role: 'patient' | 'doctor' | 'admin') => {
-    if (role === 'patient') {
-      setEmail('patient@urcure.com');
-      setPassword('PatientPass123!');
-    } else if (role === 'doctor') {
-      setEmail('dr.sharma@urcure.com');
-      setPassword('DoctorPass123!');
-    } else {
-      setEmail('admin@urcure.com');
-      setPassword('AdminPass123!');
-    }
+  const fillAdmin = () => {
+    setEmail('admin@urcure.com');
+    setPassword('AdminPass123!');
     setTab('login');
   };
 
@@ -259,40 +251,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
         </div>
 
-        {/* Demo Persona Quick-Fill Strip */}
-        <div className="p-3 rounded-xl bg-white/[0.02] border border-[#292929] space-y-2">
-          <div className="flex items-center justify-between text-[11px] font-mono text-[#777777]">
-            <span>Quick Test Accounts</span>
-            <span className="text-[#C0C0C0]">Click to test:</span>
+        {/* Live Database & Security Badge */}
+        <div className="p-3 rounded-xl bg-white/[0.02] border border-[#292929] flex items-center justify-between text-xs">
+          <div className="flex items-center space-x-2 text-[#999]">
+            <ShieldCheck className="w-3.5 h-3.5 text-white" />
+            <span>MongoDB Atlas Live Cluster Connected</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {currentPortal === 'patient' ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => fillQuickDemo('patient')}
-                  className="px-2.5 py-1.5 rounded-lg text-xs bg-[#111111] border border-[#292929] hover:border-white/40 text-white font-mono"
-                >
-                  Demo Patient
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillQuickDemo('admin')}
-                  className="px-2.5 py-1.5 rounded-lg text-xs bg-[#111111] border border-[#292929] hover:border-white/40 text-white font-mono"
-                >
-                  Demo Admin
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={() => fillQuickDemo('doctor')}
-                className="col-span-2 px-2.5 py-1.5 rounded-lg text-xs bg-[#111111] border border-[#292929] hover:border-white/40 text-white font-mono"
-              >
-                Demo Doctor (Dr. Priya Sharma)
-              </button>
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={fillAdmin}
+            className="text-[11px] font-mono text-[#888] hover:text-white underline cursor-pointer"
+          >
+            Admin Sign In
+          </button>
         </div>
 
         {/* Error / Notice message */}
@@ -365,7 +336,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={pName}
                   onChange={(e) => setPName(e.target.value)}
-                  placeholder="e.g. Zayn Al-Mansoor"
+                  placeholder="e.g. Tariq Al-Mansoor"
                   className="w-full px-3 py-2 rounded-lg bg-[#111111] border border-[#292929] text-xs text-white focus:outline-none focus:border-white/50"
                 />
               </div>

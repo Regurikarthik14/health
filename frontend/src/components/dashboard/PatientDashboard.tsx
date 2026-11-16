@@ -398,29 +398,41 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                 </div>
 
                 {/* Metric 3 */}
-                <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-2">
+                <div 
+                  onClick={() => onNavigateTab('wellbeing')}
+                  className="p-5 rounded-2xl bg-[#111111] border border-[#292929] hover:border-white/50 transition-all cursor-pointer space-y-2 group"
+                >
                   <div className="flex items-center justify-between text-xs font-mono text-[#777777]">
                     <span>Latest Mood Check</span>
-                    <Brain className="w-4 h-4 text-white" />
+                    <Brain className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
                   </div>
                   <div className="text-3xl font-bold text-white font-mono">
-                    {latestAssessment ? `${latestAssessment.score} / 27` : '3 / 27'}
+                    {latestAssessment ? `${latestAssessment.score} / 27` : '0 / 27'}
                   </div>
                   <p className="text-[11px] text-[#929292]">
-                    Result: <strong className="text-white uppercase">{latestAssessment ? latestAssessment.severity_level : 'Minimal'}</strong>
+                    {latestAssessment ? (
+                      <>Result: <strong className="text-white uppercase">{latestAssessment.severity_level}</strong></>
+                    ) : (
+                      <span>No quiz taken yet</span>
+                    )}
                   </p>
                 </div>
 
                 {/* Metric 4 */}
-                <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] space-y-2">
+                <div 
+                  onClick={() => setActiveTab('records')}
+                  className="p-5 rounded-2xl bg-[#111111] border border-[#292929] hover:border-white/50 transition-all cursor-pointer space-y-2 group"
+                >
                   <div className="flex items-center justify-between text-xs font-mono text-[#777777]">
                     <span>Doctor Notes</span>
-                    <FileText className="w-4 h-4 text-white" />
+                    <FileText className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
                   </div>
                   <div className="text-3xl font-bold text-white font-mono">
-                    {clinicalRecords.length + 1}
+                    {clinicalRecords.length}
                   </div>
-                  <p className="text-[11px] text-[#929292]">Private visit summaries</p>
+                  <p className="text-[11px] text-[#929292]">
+                    {clinicalRecords.length === 1 ? '1 visit note from doctor' : `${clinicalRecords.length} visit notes from doctor`}
+                  </p>
                 </div>
 
               </div>
@@ -572,28 +584,182 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                 <div className="flex items-center justify-between pb-3 border-b border-[#292929]">
                   <div className="flex items-center space-x-2">
                     <FileText className="w-4 h-4 text-white" />
-                    <h3 className="text-sm font-semibold text-white">Private Doctor Notes</h3>
+                    <h3 className="text-sm font-semibold text-white">Private Doctor Notes & Prescriptions</h3>
                   </div>
-                  <span className="text-[11px] font-mono text-[#777]">Only visible to you & your doctor</span>
+                  <span className="text-[11px] font-mono text-[#777]">Live notes updated by your doctor</span>
                 </div>
 
                 <div className="space-y-3">
-                  <div className="p-4 rounded-xl bg-[#111111] border border-[#292929] space-y-2">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-semibold text-white">Doctor Visit Summary • Dr. Priya Sharma</span>
-                      <span className="text-mono text-[#777]">Nov 2026</span>
+                  {clinicalRecords.length === 0 ? (
+                    <div className="p-8 text-center text-xs font-mono text-[#777777] bg-[#111111] rounded-xl border border-[#222]">
+                      No notes recorded yet. When your doctor finishes a consultation or adds medical instructions, they will appear here.
                     </div>
-                    <p className="text-xs text-[#929292] leading-relaxed">
-                      "Patient is sleeping better. Advice: Get natural morning sunlight and practice calm breathing twice a day."
-                    </p>
-                    <div className="pt-1 text-[11px] font-mono text-[#C0C0C0]">
-                      Next Visit: Scheduled • Status: Active
-                    </div>
-                  </div>
+                  ) : (
+                    clinicalRecords.map((rec) => (
+                      <div key={rec.id} className="p-4 rounded-xl bg-[#111111] border border-[#292929] space-y-2">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-semibold text-white">{rec.title}</span>
+                          <span className="text-mono text-[#777]">
+                            {rec.created_at ? new Date(rec.created_at).toLocaleDateString() : 'Recent'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-[#CCCCCC] leading-relaxed whitespace-pre-line font-mono">
+                          {rec.details}
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
             </>
+          )}
+
+          {/* DEDICATED DOCTOR NOTES & PRESCRIPTIONS VIEW */}
+          {activeTab === 'records' && (
+            <div className="space-y-6">
+              <div className="p-6 sm:p-8 rounded-2xl bg-[#0B0B0B] border border-[#292929] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-mono uppercase text-[#777777]">Medical Records & Clinical Care</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-white/10 text-white border border-white/20">
+                      Encrypted & Private
+                    </span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
+                    Private Doctor Clinical Notes
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#929292]">
+                    Official notes, prescriptions, diagnosis summaries, and medical care plans recorded by your doctor.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <span className="text-xs font-mono text-white bg-white/10 px-3 py-1.5 rounded-xl border border-white/20">
+                    {clinicalRecords.length} Clinical Notes
+                  </span>
+                </div>
+              </div>
+
+              {clinicalRecords.length === 0 ? (
+                <div className="p-12 text-center rounded-2xl bg-[#0E0E0E] border border-[#242424] space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto">
+                    <FileText className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-base font-semibold text-white">No Doctor Notes Yet</h3>
+                  <p className="text-xs text-[#888888] max-w-md mx-auto">
+                    When your doctor completes a consultation or writes medical recommendations and prescriptions, they will be securely saved and displayed here.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {clinicalRecords.map((rec) => (
+                    <div 
+                      key={rec.id} 
+                      className="p-6 rounded-2xl bg-[#0E0E0E] border border-[#282828] hover:border-white/40 transition-all space-y-4 shadow-xl"
+                    >
+                      <div className="flex items-center justify-between pb-3 border-b border-[#222]">
+                        <span className="text-xs font-mono uppercase px-2.5 py-1 rounded bg-white/10 text-white border border-white/20">
+                          {rec.record_type.replace('_', ' ')}
+                        </span>
+                        <span className="text-xs font-mono text-[#888]">
+                          {rec.created_at ? new Date(rec.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent'}
+                        </span>
+                      </div>
+                      <h4 className="text-base font-bold text-white">{rec.title}</h4>
+                      <div className="p-4 rounded-xl bg-black border border-[#222] text-xs text-[#E0E0E0] leading-relaxed whitespace-pre-line font-mono">
+                        {rec.details}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* DEDICATED APPOINTMENTS VIEW */}
+          {activeTab === 'appointments' && (
+            <div className="space-y-6">
+              <div className="p-6 sm:p-8 rounded-2xl bg-[#0B0B0B] border border-[#292929] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <span className="text-xs font-mono uppercase text-[#777777]">Visits & Consultations</span>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
+                    My Doctor Appointments
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#929292]">
+                    Confirmed 30-minute private visits, video call links, and past visit history.
+                  </p>
+                </div>
+                <button
+                  onClick={onOpenBooking}
+                  className="px-5 py-3 rounded-xl text-xs font-semibold text-black bg-white hover:bg-[#EAEAEA] transition-all flex items-center space-x-2 shrink-0 cursor-pointer"
+                >
+                  <CalendarPlus className="w-4 h-4" />
+                  <span>Book a New Visit</span>
+                </button>
+              </div>
+
+              {appointments.length === 0 ? (
+                <div className="p-12 text-center rounded-2xl bg-[#0E0E0E] border border-[#242424] space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-base font-semibold text-white">No Visits Booked Yet</h3>
+                  <p className="text-xs text-[#888888] max-w-md mx-auto">
+                    You have not booked any appointments yet. Click "Book a New Visit" to pick an available verified doctor and choose a time.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {appointments.map((app) => (
+                    <div
+                      key={app.id}
+                      className="p-5 rounded-xl bg-[#0E0E0E] border border-[#282828] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold text-sm text-white">{app.doctor_name}</span>
+                          <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${
+                            app.status === 'confirmed' || app.status === 'rescheduled'
+                              ? 'bg-white/10 text-white border-white/20'
+                              : app.status === 'completed'
+                              ? 'bg-white/[0.04] text-[#888] border-[#333]'
+                              : 'bg-white/[0.02] text-[#555] border-[#222]'
+                          }`}>
+                            {app.status === 'confirmed' ? 'Confirmed' : app.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-[#929292] font-mono">
+                          {app.appointment_date} • {app.start_time} – {app.end_time} ({app.consultation_mode === 'online' ? 'Online Video' : 'In-Person Clinic'})
+                        </p>
+                        <p className="text-[11px] font-mono text-[#777]">Booking Code: {app.booking_reference}</p>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <a
+                          href={`/api/appointments/${app.booking_reference}/calendar.ics`}
+                          download
+                          className="px-3 py-1.5 rounded-lg text-xs font-mono bg-[#050505] border border-[#292929] hover:border-white text-white flex items-center space-x-1"
+                          title="Download Calendar"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Save to Calendar</span>
+                        </a>
+
+                        {(app.status === 'confirmed' || app.status === 'rescheduled') && (
+                          <button
+                            disabled={actionLoading}
+                            onClick={() => handleCancelAppointment(app.id)}
+                            className="px-3 py-1.5 rounded-lg text-xs font-mono bg-white/[0.04] border border-[#292929] hover:border-white/50 text-[#929292] hover:text-white"
+                          >
+                            Cancel Visit
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
         </main>

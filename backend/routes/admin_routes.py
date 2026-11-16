@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, timezone
 from models import db, User, Doctor, Patient, Appointment, DoctorCredential, CrisisEvent, AuditLog, Notification, FollowUp, Referral
+from mongo_service import mongo_service
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -121,8 +122,13 @@ def toggle_doctor_verification(doctor_id):
         ip_address=request.remote_addr or '127.0.0.1'
     )
     db.session.add(audit)
-
     db.session.commit()
+
+    # Sync verification to MongoDB Atlas
+    mongo_service.set_doctor_verification(doctor.id, verify)
+    mongo_service.save_doctor(doctor.to_dict())
+    mongo_service.log_audit(admin_user.id, 'VERIFY_DOCTOR' if verify else 'REJECT_DOCTOR', 'Doctor', f"Doctor {doctor.id} set to {verify}", request.remote_addr or '127.0.0.1')
+
     return jsonify({
         'message': f"Doctor verification status updated to {verify}.",
         'doctor': doctor.to_dict()

@@ -6,6 +6,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from models import db, User, Patient, Doctor, Appointment, AuditLog, HealthBlock, HealthBlockEvent
 from services.symptom_diagnosis_engine import diagnosis_engine, BODY_AREAS
+from mongo_service import mongo_service
 
 health_block_bp = Blueprint('health_blocks', __name__)
 
@@ -208,6 +209,12 @@ def create_health_block():
     db.session.add(audit)
     db.session.commit()
 
+    # Sync to MongoDB Atlas
+    mongo_service.save_health_block(block.to_dict())
+    mongo_service.save_health_block_event(start_event.to_dict())
+    mongo_service.save_health_block_event(triage_event.to_dict())
+    mongo_service.log_audit(current_user_id, 'CREATE_HEALTH_BLOCK', 'HealthBlock', f"Created Personal Health Block {block_ref} for {body_area}", request.remote_addr or '127.0.0.1')
+
     return jsonify({
         'message': 'Personal Health Block initialized successfully.',
         'block': block.to_dict()
@@ -363,6 +370,10 @@ def add_timeline_event(identifier):
 
     db.session.commit()
 
+    # Sync to MongoDB Atlas
+    mongo_service.save_health_block(block.to_dict())
+    mongo_service.save_health_block_event(event.to_dict())
+
     return jsonify({
         'message': 'Timeline event added to health block.',
         'event': event.to_dict(),
@@ -432,6 +443,11 @@ def resolve_health_block(identifier):
     )
     db.session.add(audit)
     db.session.commit()
+
+    # Sync to MongoDB Atlas
+    mongo_service.save_health_block(block.to_dict())
+    mongo_service.save_health_block_event(res_event.to_dict())
+    mongo_service.log_audit(current_user_id, 'RESOLVE_HEALTH_BLOCK', 'HealthBlock', f"Resolved Health Block {block.block_reference}", request.remote_addr or '127.0.0.1')
 
     return jsonify({
         'message': 'Health Block marked as resolved successfully.',

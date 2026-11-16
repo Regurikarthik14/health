@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, timedelta, timezone, date as dt_date
 import uuid
 from models import db, Appointment, Doctor, Patient, User, Notification, AuditLog, Consultation
+from mongo_service import mongo_service
 
 appointment_bp = Blueprint('appointments', __name__)
 
@@ -162,6 +163,10 @@ def book_appointment():
 
         db.session.commit()
 
+        # Save to MongoDB Atlas
+        mongo_service.save_appointment(appointment.to_dict())
+        mongo_service.log_audit(user.id, 'BOOK_APPOINTMENT', 'Appointment', f"Appointment {booking_ref} created with Dr. {doctor.user.full_name}", request.remote_addr or '127.0.0.1')
+
         return jsonify({
             'message': 'Appointment confirmed successfully with exclusive slot reservation.',
             'appointment': appointment.to_dict()
@@ -251,6 +256,9 @@ def cancel_appointment(appointment_id):
     db.session.add(audit)
     db.session.commit()
 
+    mongo_service.save_appointment(appointment.to_dict())
+    mongo_service.log_audit(user.id, 'CANCEL_APPOINTMENT', 'Appointment', f"Appointment {appointment.booking_reference} cancelled", request.remote_addr or '127.0.0.1')
+
     return jsonify({
         'message': 'Appointment cancelled successfully. Slot has been released.',
         'appointment': appointment.to_dict()
@@ -313,6 +321,8 @@ def reschedule_appointment(appointment_id):
     db.session.add(notif)
 
     db.session.commit()
+    mongo_service.save_appointment(appointment.to_dict())
+    mongo_service.log_audit(user.id, 'RESCHEDULE_APPOINTMENT', 'Appointment', f"Appointment {appointment.booking_reference} rescheduled", request.remote_addr or '127.0.0.1')
     return jsonify({
         'message': 'Appointment rescheduled successfully.',
         'appointment': appointment.to_dict()

@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta, datetime, timezone
 from models import db, User, Patient, Doctor, DoctorCredential, ConsentRecord, AuditLog
+from mongo_service import mongo_service
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -43,6 +44,7 @@ def register_patient():
         consent_accepted=consent_accepted
     )
     db.session.add(patient)
+    db.session.flush()
 
     if consent_accepted:
         consent = ConsentRecord(
@@ -62,6 +64,13 @@ def register_patient():
     )
     db.session.add(audit)
     db.session.commit()
+
+    mongo_service.log_audit(user.id, 'LOGIN', 'Auth', f"User {email} logged in successfully", request.remote_addr or '127.0.0.1')
+
+    # Sync to MongoDB Atlas
+    mongo_service.save_user(user.to_dict())
+    mongo_service.save_patient(patient.to_dict())
+    mongo_service.log_audit(user.id, 'REGISTER_PATIENT', 'Patient', f"Patient {email} registered", request.remote_addr or '127.0.0.1')
 
     access_token = create_access_token(
         identity=str(user.id),
@@ -146,6 +155,13 @@ def register_doctor():
     db.session.add(audit)
     db.session.commit()
 
+    mongo_service.log_audit(user.id, 'LOGIN', 'Auth', f"User {email} logged in successfully", request.remote_addr or '127.0.0.1')
+
+    # Sync to MongoDB Atlas
+    mongo_service.save_user(user.to_dict())
+    mongo_service.save_doctor(doctor.to_dict())
+    mongo_service.log_audit(user.id, 'REGISTER_DOCTOR', 'Doctor', f"Doctor {email} registered (pending verification)", request.remote_addr or '127.0.0.1')
+
     access_token = create_access_token(
         identity=str(user.id),
         additional_claims={'role': user.role, 'email': user.email, 'name': user.full_name},
@@ -190,6 +206,8 @@ def login():
     )
     db.session.add(audit)
     db.session.commit()
+
+    mongo_service.log_audit(user.id, 'LOGIN', 'Auth', f"User {email} logged in successfully", request.remote_addr or '127.0.0.1')
 
     return jsonify({
         'token': access_token,
