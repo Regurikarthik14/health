@@ -626,8 +626,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Patient Portal Footer Notice */}
         {currentPortal === 'patient' ? (
-          <div className="pt-4 text-center text-xs text-[#777777] border-t border-[#1F1F1F]">
-            <span>Your personal health information is private and encrypted.</span>
+          <div className="pt-4 text-center text-xs text-[#777777] border-t border-[#1F1F1F] space-y-1.5">
+            <div>Your personal health information is private and encrypted.</div>
+            <div className="text-[11px] text-[#666666]">
+              <span>Licensed doctor or clinical staff? </span>
+              <a
+                href="/doctor"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onClose();
+                  window.location.hash = '/doctor';
+                }}
+                className="text-[#AAAAAA] hover:text-white underline cursor-pointer"
+              >
+                Open Doctor Portal →
+              </a>
+            </div>
           </div>
         ) : (
           <div className="pt-4 text-center text-xs text-[#777777] border-t border-[#1F1F1F]">

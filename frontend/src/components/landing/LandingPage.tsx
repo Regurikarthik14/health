@@ -878,12 +878,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div className="pt-8 border-t border-[#292929] flex flex-col sm:flex-row items-center justify-between text-xs text-[#666666]">
             <span>© {new Date().getFullYear()} urCure Health. Abu Dhabi, United Arab Emirates.</span>
-            <div className="flex space-x-4 mt-4 sm:mt-0">
+            <div className="flex flex-wrap items-center space-x-3 sm:space-x-4 mt-4 sm:mt-0 text-xs">
               <span className="hover:text-white cursor-pointer">Privacy</span>
               <span>•</span>
               <span className="hover:text-white cursor-pointer">Terms</span>
               <span>•</span>
               <span className="hover:text-white cursor-pointer">Doctor Standards</span>
+              <span>•</span>
+              <button
+                onClick={() => onNavigate('doctor-gateway')}
+                className="text-[#999999] hover:text-white font-medium transition-colors cursor-pointer inline-flex items-center space-x-1"
+                title="Private Access for Licensed Doctors"
+              >
+                <span>Doctor Portal (Staff Only)</span>
+                <span>→</span>
+              </button>
             </div>
           </div>
 
