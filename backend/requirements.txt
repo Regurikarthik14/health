@@ -10,3 +10,4 @@ pandas>=2.2.0
 python-dateutil>=2.9.0
 gunicorn>=21.2.0
 psycopg2-binary>=2.9.9
+datasets>=2.18.0

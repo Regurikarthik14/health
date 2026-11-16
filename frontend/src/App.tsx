@@ -17,6 +17,7 @@ import { ServicesView } from './components/services/ServicesView';
 import { AboutView } from './components/about/AboutView';
 import { SubpageHeader } from './components/navigation/SubpageHeader';
 import { QuickFeatureDock } from './components/navigation/QuickFeatureDock';
+import { BodyAreaSymptomGuide } from './components/health-blocks/BodyAreaSymptomGuide';
 import type { Doctor, Appointment } from './types';
 
 const MainApp: React.FC = () => {
@@ -182,6 +183,27 @@ const MainApp: React.FC = () => {
               onOpenSOS={() => setEmergencyModalOpen(true)}
               onNavigateDoctors={() => handleNavigate('doctors')}
             />
+          </div>
+        )}
+
+        {currentView === 'symptom-guide' && (
+          <div>
+            <SubpageHeader
+              currentView={currentView}
+              title="Body Area Symptom Guide & Health Blocks"
+              category="Symptom Checker"
+              onNavigate={handleNavigate}
+            />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <BodyAreaSymptomGuide
+                onSelectDoctorForBooking={handleSelectDoctorForBooking}
+                onOpenAuth={handleOpenAuth}
+                onOpenSOS={() => setEmergencyModalOpen(true)}
+                onBlockCreated={() => {
+                  handleNavigate('patient-dashboard');
+                }}
+              />
+            </div>
           </div>
         )}
 

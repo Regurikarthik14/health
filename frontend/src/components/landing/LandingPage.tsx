@@ -15,7 +15,8 @@ import {
   FileText,
   ChevronRight,
   PhoneCall,
-  Bot
+  Bot,
+  Activity
 } from 'lucide-react';
 import { ObsidianOrbCanvas } from './ObsidianOrbCanvas';
 import { UrCureLogo } from '../common/UrCureLogo';
@@ -87,6 +88,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <Stethoscope className="w-4 h-4 text-[#C0C0C0]" />
                 <span>Find a Doctor</span>
               </button>
+            </div>
+
+            {/* Body Area Trouble Guide CTA */}
+            <div 
+              onClick={() => onNavigate('symptom-guide')}
+              className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-[#141414] to-[#0A0A0A] border border-white/20 hover:border-white/50 transition-all cursor-pointer flex items-center justify-between group shadow-lg"
+            >
+              <div className="flex items-center space-x-3.5 text-left">
+                <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center group-hover:scale-105 transition-transform text-white">
+                  <Activity className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[11px] font-mono uppercase text-[#C0C0C0] tracking-wider">Trouble in your body?</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Auto Specialist Match</span>
+                  </div>
+                  <div className="text-sm font-semibold text-white group-hover:text-emerald-300 transition-colors">
+                    Body Area Symptom Guide & Personal Health Blocks →
+                  </div>
+                  <div className="text-xs text-[#888888]">
+                    Pick where it hurts. We find the right specialist and track your problem from start to end in a private block.
+                  </div>
+                </div>
+              </div>
+              <ArrowRight className="w-5 h-5 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all flex-shrink-0 ml-4 hidden sm:block" />
             </div>
 
             {/* Trust Badges */}

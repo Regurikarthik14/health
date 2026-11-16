@@ -63,6 +63,7 @@ class Patient(db.Model):
     consent_records = db.relationship('ConsentRecord', backref='patient', lazy='dynamic')
     clinical_records = db.relationship('ClinicalRecord', backref='patient', lazy='dynamic')
     follow_ups = db.relationship('FollowUp', backref='patient', lazy='dynamic')
+    health_blocks = db.relationship('HealthBlock', backref='patient', lazy='dynamic', cascade='all, delete-orphan')
 
     def to_dict(self):
         return {
@@ -110,6 +111,7 @@ class Doctor(db.Model):
     availabilities = db.relationship('DoctorAvailability', backref='doctor', lazy='dynamic', cascade='all, delete-orphan')
     appointments = db.relationship('Appointment', backref='doctor', lazy='dynamic')
     consultations = db.relationship('Consultation', backref='doctor', lazy='dynamic')
+    assigned_health_blocks = db.relationship('HealthBlock', backref='assigned_doctor', lazy='dynamic')
 
     def to_dict(self):
         modes = [m.strip() for m in self.consultation_modes.split(',') if m.strip()]
@@ -522,4 +524,145 @@ class AuditLog(db.Model):
             'details': self.details,
             'ip_address': self.ip_address,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None
+        }
+
+
+class HealthBlock(db.Model):
+    """
+    Dedicated Personal Health Block tracking a single patient health problem/episode
+    from initial symptom triage (start) through consultations and treatments to resolution (end).
+    Maintained as a tamper-evident, cryptographically secure health ledger block.
+    """
+    __tablename__ = 'health_blocks'
+
+    id = db.Column(db.Integer, primary_key=True)
+    block_reference = db.Column(db.String(50), unique=True, nullable=False, index=True)  # e.g. "HB-2026-F981"
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id', ondelete='CASCADE'), nullable=False, index=True)
+    title = db.Column(db.String(200), nullable=False)
+    body_area = db.Column(db.String(100), nullable=False)
+    primary_symptoms = db.Column(db.Text, nullable=False)  # JSON array string or comma separated
+    trouble_description = db.Column(db.Text, nullable=True)
+    pain_scale = db.Column(db.Integer, default=5)  # 1 - 10
+    onset_date = db.Column(db.String(50), nullable=True)
+    severity = db.Column(db.String(30), default='moderate')  # 'mild', 'moderate', 'severe', 'critical'
+    status = db.Column(db.String(30), default='active')  # 'active', 'under_investigation', 'under_treatment', 'resolved', 'closed'
+
+    # Disease Recognition & Specialist Guidance (derived from sajjadhadi/disease-diagnosis-dataset)
+    recognized_diagnosis = db.Column(db.String(255), nullable=True)
+    possible_diagnoses = db.Column(db.Text, nullable=True)  # JSON array of differential conditions
+    recommended_specialist = db.Column(db.String(100), nullable=False)
+    specialist_reason = db.Column(db.Text, nullable=True)
+    triage_notes = db.Column(db.Text, nullable=True)
+    urgency_level = db.Column(db.String(30), default='routine')  # 'routine', 'urgent', 'immediate_emergency'
+
+    # Care Team Links
+    assigned_doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id', ondelete='SET NULL'), nullable=True)
+    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id', ondelete='SET NULL'), nullable=True)
+
+    # Resolution Milestones (End of Problem)
+    resolution_summary = db.Column(db.Text, nullable=True)
+    resolved_at = db.Column(db.DateTime, nullable=True)
+    resolved_by = db.Column(db.String(120), nullable=True)
+
+    # Cryptographic Tamper-Evident Security
+    genesis_hash = db.Column(db.String(64), nullable=False)
+    current_block_hash = db.Column(db.String(64), nullable=False)
+
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    events = db.relationship('HealthBlockEvent', backref='health_block', lazy='dynamic', cascade='all, delete-orphan')
+
+    def to_dict(self):
+        import json
+        symptoms_list = []
+        if self.primary_symptoms:
+            try:
+                symptoms_list = json.loads(self.primary_symptoms) if self.primary_symptoms.startswith('[') else [s.strip() for s in self.primary_symptoms.split(',') if s.strip()]
+            except Exception:
+                symptoms_list = [self.primary_symptoms]
+
+        differentials = []
+        if self.possible_diagnoses:
+            try:
+                differentials = json.loads(self.possible_diagnoses)
+            except Exception:
+                differentials = []
+
+        return {
+            'id': self.id,
+            'block_reference': self.block_reference,
+            'patient_id': self.patient_id,
+            'patient_name': self.patient.user.full_name if self.patient and self.patient.user else 'Patient',
+            'title': self.title,
+            'body_area': self.body_area,
+            'primary_symptoms': symptoms_list,
+            'trouble_description': self.trouble_description,
+            'pain_scale': self.pain_scale,
+            'onset_date': self.onset_date,
+            'severity': self.severity,
+            'status': self.status,
+            'recognized_diagnosis': self.recognized_diagnosis,
+            'possible_diagnoses': differentials,
+            'recommended_specialist': self.recommended_specialist,
+            'specialist_reason': self.specialist_reason,
+            'triage_notes': self.triage_notes,
+            'urgency_level': self.urgency_level,
+            'assigned_doctor_id': self.assigned_doctor_id,
+            'assigned_doctor_name': self.assigned_doctor.user.full_name if self.assigned_doctor and self.assigned_doctor.user else None,
+            'assigned_doctor_specialization': self.assigned_doctor.specialization if self.assigned_doctor else None,
+            'appointment_id': self.appointment_id,
+            'resolution_summary': self.resolution_summary,
+            'resolved_at': self.resolved_at.isoformat() if self.resolved_at else None,
+            'resolved_by': self.resolved_by,
+            'genesis_hash': self.genesis_hash,
+            'current_block_hash': self.current_block_hash,
+            'events_count': self.events.count(),
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+
+class HealthBlockEvent(db.Model):
+    """
+    Individual chronological ledger entry inside a Health Block.
+    Maintains a cryptographic hash chain linking to previous events.
+    """
+    __tablename__ = 'health_block_events'
+
+    id = db.Column(db.Integer, primary_key=True)
+    health_block_id = db.Column(db.Integer, db.ForeignKey('health_blocks.id', ondelete='CASCADE'), nullable=False, index=True)
+    event_type = db.Column(db.String(50), nullable=False)  # 'intake_start', 'triage_result', 'doctor_consultation', 'symptom_update', 'prescription', 'doctor_note', 'resolution'
+    author_role = db.Column(db.String(30), nullable=False)  # 'patient', 'doctor', 'ai_triage', 'system'
+    author_id = db.Column(db.Integer, nullable=True)
+    author_name = db.Column(db.String(120), nullable=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    pain_level_recorded = db.Column(db.Integer, nullable=True)
+    data_payload = db.Column(db.Text, nullable=True)  # JSON payload
+    event_hash = db.Column(db.String(64), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def to_dict(self):
+        import json
+        payload = {}
+        if self.data_payload:
+            try:
+                payload = json.loads(self.data_payload)
+            except Exception:
+                payload = {'raw': self.data_payload}
+
+        return {
+            'id': self.id,
+            'health_block_id': self.health_block_id,
+            'event_type': self.event_type,
+            'author_role': self.author_role,
+            'author_id': self.author_id,
+            'author_name': self.author_name,
+            'title': self.title,
+            'description': self.description,
+            'pain_level_recorded': self.pain_level_recorded,
+            'data_payload': payload,
+            'event_hash': self.event_hash,
+            'created_at': self.created_at.isoformat() if self.created_at else None
         }

@@ -235,3 +235,87 @@ export interface EmergencyContact {
   availability: string;
   description: string;
 }
+
+export interface BodyArea {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  common_symptoms: string[];
+}
+
+export interface DifferentialDiagnosis {
+  name: string;
+  confidence: number;
+  specialist?: string;
+  description: string;
+}
+
+export interface SymptomTriageAnalysis {
+  body_area: string;
+  body_area_id: string;
+  primary_symptoms: string[];
+  pain_scale: number;
+  recognized_diagnosis: string;
+  differential_diagnoses: DifferentialDiagnosis[];
+  recommended_specialist: string;
+  specialist_reason: string;
+  urgency_level: 'routine' | 'urgent' | 'immediate_emergency';
+  home_care_recommendations: string;
+  red_flags: string;
+  dataset_source: string;
+  is_emergency: boolean;
+}
+
+export interface TriageResponse {
+  analysis: SymptomTriageAnalysis;
+  matching_doctors: Doctor[];
+}
+
+export interface HealthBlockEvent {
+  id: number;
+  health_block_id: number;
+  event_type: 'intake_start' | 'triage_result' | 'doctor_consultation' | 'symptom_update' | 'prescription' | 'doctor_note' | 'resolution';
+  author_role: 'patient' | 'doctor' | 'ai_triage' | 'system';
+  author_id?: number;
+  author_name?: string;
+  title: string;
+  description: string;
+  pain_level_recorded?: number;
+  data_payload?: any;
+  event_hash: string;
+  created_at: string;
+}
+
+export interface HealthBlock {
+  id: number;
+  block_reference: string;
+  patient_id: number;
+  patient_name: string;
+  title: string;
+  body_area: string;
+  primary_symptoms: string[];
+  trouble_description?: string;
+  pain_scale: number;
+  onset_date?: string;
+  severity: 'mild' | 'moderate' | 'severe' | 'critical';
+  status: 'active' | 'under_investigation' | 'under_treatment' | 'resolved' | 'closed';
+  recognized_diagnosis?: string;
+  possible_diagnoses: DifferentialDiagnosis[];
+  recommended_specialist: string;
+  specialist_reason?: string;
+  triage_notes?: string;
+  urgency_level: 'routine' | 'urgent' | 'immediate_emergency';
+  assigned_doctor_id?: number;
+  assigned_doctor_name?: string;
+  assigned_doctor_specialization?: string;
+  appointment_id?: number;
+  resolution_summary?: string;
+  resolved_at?: string;
+  resolved_by?: string;
+  genesis_hash: string;
+  current_block_hash: string;
+  events_count: number;
+  created_at: string;
+  updated_at?: string;
+}

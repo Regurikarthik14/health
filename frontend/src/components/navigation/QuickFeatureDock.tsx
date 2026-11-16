@@ -8,6 +8,7 @@ import {
   ShieldAlert, 
   Layers, 
   ShieldCheck,
+  Activity,
   UserCheck,
   Check,
   ChevronDown
@@ -51,6 +52,7 @@ export const QuickFeatureDock: React.FC<QuickFeatureDockProps> = ({
     { id: 'landing', label: 'Home', icon: Home },
     { id: 'doctors', label: 'Find Doctors', icon: Stethoscope },
     { id: 'wellbeing', label: 'Check Mood', icon: Brain },
+    { id: 'symptom-guide', label: 'Body Guide', icon: Activity },
     { id: 'ai', label: 'AI Helper', icon: Bot },
     { id: 'services', label: 'Services', icon: Layers },
     { id: 'about', label: 'About Us', icon: ShieldCheck },

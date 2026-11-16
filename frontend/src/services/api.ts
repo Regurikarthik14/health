@@ -216,4 +216,81 @@ export const api = {
     }),
 
   getAuditLogs: () => fetchWithAuth('/admin/audit-logs'),
+
+  // Health Blocks & Body Area Symptom Guide (sajjadhadi/disease-diagnosis-dataset)
+  getBodyAreas: () => fetchWithAuth('/health-blocks/body-areas'),
+
+  triageSymptoms: (data: {
+    body_area: string;
+    primary_symptoms: string[];
+    trouble_description?: string;
+    pain_scale?: number;
+    severity?: string;
+  }) =>
+    fetchWithAuth('/health-blocks/triage', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  createHealthBlock: (data: {
+    title?: string;
+    body_area: string;
+    primary_symptoms: string[];
+    trouble_description?: string;
+    pain_scale?: number;
+    severity?: string;
+    onset_date?: string;
+    recognized_diagnosis?: string;
+    possible_diagnoses?: any[];
+    recommended_specialist?: string;
+    specialist_reason?: string;
+    assigned_doctor_id?: number;
+  }) =>
+    fetchWithAuth('/health-blocks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getMyHealthBlocks: (statusFilter?: string) => {
+    const qs = statusFilter && statusFilter !== 'all' ? `?status=${encodeURIComponent(statusFilter)}` : '';
+    return fetchWithAuth(`/health-blocks${qs}`);
+  },
+
+  getHealthBlockDetail: (identifier: string | number) =>
+    fetchWithAuth(`/health-blocks/${identifier}`),
+
+  addHealthBlockEvent: (
+    identifier: string | number,
+    eventData: {
+      event_type: string;
+      title: string;
+      description: string;
+      pain_level_recorded?: number;
+      data_payload?: any;
+    }
+  ) =>
+    fetchWithAuth(`/health-blocks/${identifier}/timeline`, {
+      method: 'POST',
+      body: JSON.stringify(eventData),
+    }),
+
+  resolveHealthBlock: (
+    identifier: string | number,
+    data: {
+      resolution_summary: string;
+    }
+  ) =>
+    fetchWithAuth(`/health-blocks/${identifier}/resolve`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  linkAppointmentToHealthBlock: (
+    identifier: string | number,
+    appointmentId: number
+  ) =>
+    fetchWithAuth(`/health-blocks/${identifier}/link-appointment`, {
+      method: 'POST',
+      body: JSON.stringify({ appointment_id: appointmentId }),
+    }),
 };
