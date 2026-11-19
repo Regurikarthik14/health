@@ -367,23 +367,13 @@ export const DoctorGatewayPage: React.FC<DoctorGatewayPageProps> = ({ onNavigate
                     </div>
                   </div>
 
-                  {/* Demo Helper */}
-                  <div className="p-3 rounded-xl bg-[#050505] border border-[#222] text-[11px] text-[#777] space-y-1">
-                    <div className="font-semibold text-white">Sample Verified Doctor Account:</div>
-                    <div className="flex justify-between font-mono">
-                      <span>dr.fatima@urcure.ae</span>
-                      <span>Password: password123</span>
+                  {/* Live Security Badge */}
+                  <div className="p-3 rounded-xl bg-[#050505] border border-[#222] flex items-center justify-between text-[11px] font-mono text-[#888]">
+                    <div className="flex items-center space-x-2">
+                      <ShieldCheck className="w-3.5 h-3.5 text-white" />
+                      <span>Live Healthcare Registry Connected</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLoginEmail('dr.fatima@urcure.ae');
-                        setLoginPassword('password123');
-                      }}
-                      className="text-white underline hover:text-[#CCC] cursor-pointer mt-1"
-                    >
-                      Click to auto-fill sample doctor credentials
-                    </button>
+                    <span className="text-[#666]">256-bit AES Encrypted</span>
                   </div>
 
                   <button

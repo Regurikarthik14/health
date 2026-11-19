@@ -253,7 +253,12 @@ def get_my_health_blocks():
         if not doctor:
             return jsonify({'health_blocks': []}), 200
 
-        query = HealthBlock.query.filter_by(assigned_doctor_id=doctor.id)
+        patient_ids = [a.patient_id for a in doctor.appointments.all()]
+        conditions = [HealthBlock.assigned_doctor_id == doctor.id]
+        if patient_ids:
+            conditions.append(HealthBlock.patient_id.in_(patient_ids))
+
+        query = HealthBlock.query.filter(db.or_(*conditions))
         if status_filter and status_filter != 'all':
             query = query.filter_by(status=status_filter)
         blocks = query.order_by(HealthBlock.created_at.desc()).all()
@@ -295,7 +300,10 @@ def get_health_block_detail(identifier):
 
     # Security check
     is_owner = user.role == 'patient' and user.patient_profile and block.patient_id == user.patient_profile.id
-    is_assigned_doc = user.role == 'doctor' and user.doctor_profile and block.assigned_doctor_id == user.doctor_profile.id
+    is_assigned_doc = user.role == 'doctor' and user.doctor_profile and (
+        block.assigned_doctor_id == user.doctor_profile.id or
+        block.patient_id in [a.patient_id for a in user.doctor_profile.appointments.all()]
+    )
     is_admin = user.role == 'admin'
 
     if not (is_owner or is_assigned_doc or is_admin):
@@ -329,7 +337,10 @@ def add_timeline_event(identifier):
         return jsonify({'error': 'Health block not found.'}), 404
 
     is_owner = user.role == 'patient' and user.patient_profile and block.patient_id == user.patient_profile.id
-    is_assigned_doc = user.role == 'doctor' and user.doctor_profile and block.assigned_doctor_id == user.doctor_profile.id
+    is_assigned_doc = user.role == 'doctor' and user.doctor_profile and (
+        block.assigned_doctor_id == user.doctor_profile.id or
+        block.patient_id in [a.patient_id for a in user.doctor_profile.appointments.all()]
+    )
     is_admin = user.role == 'admin'
 
     if not (is_owner or is_assigned_doc or is_admin):
@@ -401,7 +412,10 @@ def resolve_health_block(identifier):
         return jsonify({'error': 'Health block not found.'}), 404
 
     is_owner = user.role == 'patient' and user.patient_profile and block.patient_id == user.patient_profile.id
-    is_assigned_doc = user.role == 'doctor' and user.doctor_profile and block.assigned_doctor_id == user.doctor_profile.id
+    is_assigned_doc = user.role == 'doctor' and user.doctor_profile and (
+        block.assigned_doctor_id == user.doctor_profile.id or
+        block.patient_id in [a.patient_id for a in user.doctor_profile.appointments.all()]
+    )
     is_admin = user.role == 'admin'
 
     if not (is_owner or is_assigned_doc or is_admin):
