@@ -367,6 +367,27 @@ export const DoctorGatewayPage: React.FC<DoctorGatewayPageProps> = ({ onNavigate
                     </div>
                   </div>
 
+                  {/* Sample Doctor Quick-Fill Card */}
+                  <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-mono">
+                      <span className="text-white font-semibold">Sample Doctor Credentials</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoginEmail('doctor@urcure.com');
+                          setLoginPassword('DoctorPass123!');
+                        }}
+                        className="px-2.5 py-1 rounded-md bg-white text-black font-bold text-[10px] hover:bg-[#EAEAEA] cursor-pointer"
+                      >
+                        Auto-Fill Doctor
+                      </button>
+                    </div>
+                    <div className="text-[11px] font-mono text-[#AAA] flex flex-col space-y-0.5">
+                      <span>Email: <strong className="text-white">doctor@urcure.com</strong></span>
+                      <span>Password: <strong className="text-white">DoctorPass123!</strong></span>
+                    </div>
+                  </div>
+
                   {/* Live Security Badge */}
                   <div className="p-3 rounded-xl bg-[#050505] border border-[#222] flex items-center justify-between text-[11px] font-mono text-[#888]">
                     <div className="flex items-center space-x-2">

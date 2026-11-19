@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ShieldCheck, 
-  Users, 
-  Calendar, 
-  Activity, 
-  AlertTriangle, 
-  FileText, 
-  Check, 
-  X, 
+import {
+  ShieldCheck,
+  Users,
+  Calendar,
+  Activity,
+  AlertTriangle,
+  FileText,
+  Check,
+  X,
   RefreshCw,
   Search,
   Lock,
@@ -86,7 +86,7 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-left space-y-8">
-      
+
       {/* Banner */}
       <div className="p-6 sm:p-8 rounded-2xl bg-[#0B0B0B] border border-[#292929] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -198,11 +198,10 @@ export const AdminDashboard: React.FC = () => {
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id as any)}
-            className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === t.id
+            className={`py-2 text-xs font-semibold rounded-lg transition-all ${activeTab === t.id
                 ? 'bg-white text-black font-bold shadow-md'
                 : 'text-[#929292] hover:text-white'
-            }`}
+              }`}
           >
             {t.label}
           </button>
@@ -276,11 +275,10 @@ export const AdminDashboard: React.FC = () => {
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
                     <h4 className="font-bold text-white text-sm">{doc.full_name}</h4>
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded uppercase border ${
-                      doc.is_verified
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded uppercase border ${doc.is_verified
                         ? 'bg-white/10 text-white border-white/20'
                         : 'bg-white/[0.04] text-[#C0C0C0] border-[#333]'
-                    }`}>
+                      }`}>
                       {doc.is_verified ? 'Approved' : 'Pending Check'}
                     </span>
                   </div>
@@ -291,11 +289,10 @@ export const AdminDashboard: React.FC = () => {
                 <button
                   disabled={actionLoading}
                   onClick={() => handleToggleVerification(doc.id, doc.is_verified)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                    doc.is_verified
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${doc.is_verified
                       ? 'bg-white/[0.05] border border-[#333] text-[#929292] hover:text-white'
                       : 'bg-white text-black hover:bg-[#EAEAEA]'
-                  }`}
+                    }`}
                 >
                   {doc.is_verified ? 'Pause Doctor Account' : 'Approve Doctor'}
                 </button>

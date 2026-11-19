@@ -152,6 +152,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setTab('login');
   };
 
+  const fillDoctor = () => {
+    setCurrentPortal('doctor');
+    setEmail('doctor@urcure.com');
+    setPassword('DoctorPass123!');
+    setTab('login');
+  };
+
+  const fillPatient = () => {
+    setCurrentPortal('patient');
+    setEmail('patient@urcure.com');
+    setPassword('PatientPass123!');
+    setTab('login');
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
       <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0B0B0B] border border-[#292929] shadow-2xl p-6 sm:p-8 space-y-6">
@@ -251,19 +265,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
         </div>
 
-        {/* Live Database & Security Badge */}
-        <div className="p-3 rounded-xl bg-white/[0.02] border border-[#292929] flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-2 text-[#999]">
-            <ShieldCheck className="w-3.5 h-3.5 text-white" />
-            <span>MongoDB Atlas Live Cluster Connected</span>
+        {/* Sample Credentials Quick Bar */}
+        <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="text-[11px] font-mono text-[#AAA]">Test Accounts:</span>
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={fillPatient}
+              className="px-2.5 py-1 rounded bg-[#181818] border border-[#333] hover:border-white text-[11px] text-white font-mono cursor-pointer transition-all"
+            >
+              Patient (Zayn)
+            </button>
+            <button
+              type="button"
+              onClick={fillDoctor}
+              className="px-2.5 py-1 rounded bg-[#181818] border border-[#333] hover:border-white text-[11px] text-white font-mono cursor-pointer transition-all"
+            >
+              Doctor (Dr. Tariq)
+            </button>
+            <button
+              type="button"
+              onClick={fillAdmin}
+              className="px-2.5 py-1 rounded bg-[#181818] border border-[#333] hover:border-white text-[11px] text-[#aaa] hover:text-white font-mono cursor-pointer transition-all"
+            >
+              Admin
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={fillAdmin}
-            className="text-[11px] font-mono text-[#888] hover:text-white underline cursor-pointer"
-          >
-            Admin Sign In
-          </button>
         </div>
 
         {/* Error / Notice message */}

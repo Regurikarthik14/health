@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Clock, 
-  Users, 
-  FileText, 
-  Settings, 
-  CheckCircle, 
-  Video, 
-  MapPin, 
-  ShieldCheck, 
+import {
+  LayoutDashboard,
+  Calendar,
+  Clock,
+  Users,
+  FileText,
+  Settings,
+  CheckCircle,
+  Video,
+  MapPin,
+  ShieldCheck,
   AlertCircle,
   Plus,
   RefreshCw,
@@ -179,7 +179,7 @@ export const DoctorDashboard: React.FC = () => {
 
   const isVerified = stats?.is_verified ?? false;
   const filteredAppointments = allAppointments.filter(app => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       app.patient_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       app.booking_reference?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
@@ -209,15 +209,14 @@ export const DoctorDashboard: React.FC = () => {
       {/* 1. CLINICAL PRACTICE HEADER */}
       <section className="p-6 sm:p-7 rounded-2xl bg-[#0B0B0B] border border-[#242424] shadow-xl relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          
+
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-mono uppercase text-[#777]">Healthcare Provider Portal</span>
-              <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono border flex items-center space-x-1 ${
-                isVerified
-                  ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800'
-                  : 'bg-amber-950/70 text-amber-300 border-amber-800'
-              }`}>
+              <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono border flex items-center space-x-1 ${isVerified
+                ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800'
+                : 'bg-amber-950/70 text-amber-300 border-amber-800'
+                }`}>
                 {isVerified ? (
                   <>
                     <ShieldCheck className="w-3 h-3 text-emerald-400" />
@@ -291,8 +290,8 @@ export const DoctorDashboard: React.FC = () => {
 
       {/* 2. KPI METRIC CARDS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        <div 
+
+        <div
           onClick={() => setActiveTab('queue')}
           className="p-5 rounded-2xl bg-[#0D0D0D] border border-[#222] hover:border-white/40 transition-all cursor-pointer space-y-1 group"
         >
@@ -304,7 +303,7 @@ export const DoctorDashboard: React.FC = () => {
           <p className="text-[11px] text-[#888]">30-minute patient visits</p>
         </div>
 
-        <div 
+        <div
           onClick={() => setActiveTab('appointments')}
           className="p-5 rounded-2xl bg-[#0D0D0D] border border-[#222] hover:border-white/40 transition-all cursor-pointer space-y-1 group"
         >
@@ -316,7 +315,7 @@ export const DoctorDashboard: React.FC = () => {
           <p className="text-[11px] text-[#888]">Confirmed & past visits</p>
         </div>
 
-        <div 
+        <div
           onClick={() => setActiveTab('cases')}
           className="p-5 rounded-2xl bg-[#0D0D0D] border border-[#222] hover:border-white/40 transition-all cursor-pointer space-y-1 group"
         >
@@ -328,7 +327,7 @@ export const DoctorDashboard: React.FC = () => {
           <p className="text-[11px] text-[#888]">Active problem journeys</p>
         </div>
 
-        <div 
+        <div
           onClick={() => setActiveTab('referrals')}
           className="p-5 rounded-2xl bg-[#0D0D0D] border border-[#222] hover:border-white/40 transition-all cursor-pointer space-y-1 group"
         >
@@ -352,17 +351,15 @@ export const DoctorDashboard: React.FC = () => {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id as any)}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs whitespace-nowrap transition-all cursor-pointer font-medium ${
-                isActive
-                  ? 'bg-white text-black font-bold shadow-md'
-                  : 'text-[#888888] hover:text-white hover:bg-white/[0.04]'
-              }`}
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs whitespace-nowrap transition-all cursor-pointer font-medium ${isActive
+                ? 'bg-white text-black font-bold shadow-md'
+                : 'text-[#888888] hover:text-white hover:bg-white/[0.04]'
+                }`}
             >
               <span>{t.label}</span>
               {t.badge !== null && (
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
-                  isActive ? 'bg-black text-white' : 'bg-white/10 text-[#C0C0C0]'
-                }`}>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${isActive ? 'bg-black text-white' : 'bg-white/10 text-[#C0C0C0]'
+                  }`}>
                   {t.badge}
                 </span>
               )}
@@ -701,13 +698,12 @@ export const DoctorDashboard: React.FC = () => {
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2">
                         <h4 className="text-sm font-bold text-white">{app.patient_name}</h4>
-                        <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${
-                          app.status === 'confirmed' || app.status === 'rescheduled'
-                            ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800'
-                            : app.status === 'completed'
+                        <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${app.status === 'confirmed' || app.status === 'rescheduled'
+                          ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800'
+                          : app.status === 'completed'
                             ? 'bg-white/10 text-white border-white/20'
                             : 'bg-red-950/70 text-red-300 border-red-800'
-                        }`}>
+                          }`}>
                           {app.status}
                         </span>
                       </div>
@@ -775,11 +771,10 @@ export const DoctorDashboard: React.FC = () => {
                         <span className="text-[10px] font-mono text-white bg-white/10 px-2 py-0.5 rounded border border-white/20">
                           {b.block_reference}
                         </span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase border ${
-                          b.status === 'resolved'
-                            ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
-                            : 'bg-amber-950/70 text-amber-300 border-amber-800'
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase border ${b.status === 'resolved'
+                          ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                          : 'bg-amber-950/70 text-amber-300 border-amber-800'
+                          }`}>
                           {b.status.replace('_', ' ')}
                         </span>
                       </div>
@@ -856,7 +851,7 @@ export const DoctorDashboard: React.FC = () => {
             )}
 
             <form onSubmit={handleSaveNotes} className="space-y-5 text-left">
-              
+
               {/* Patient Selector */}
               <div className="space-y-1">
                 <label className="text-xs font-mono uppercase text-[#777]">Select Patient Consultation *</label>
