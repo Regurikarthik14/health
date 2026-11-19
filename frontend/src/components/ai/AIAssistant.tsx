@@ -37,11 +37,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
   onSelectDoctorForBooking
 }) => {
   const { user } = useAuth();
+  const [lang, setLang] = useState<'en' | 'ar'>('en');
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'm1',
       sender: 'ai',
-      text: `Hello ${user ? user.full_name.split(' ')[0] : 'there'}! I am **urCure AI**, your friendly health helper.\n\nI can help you calm down with easy breathing exercises, prepare questions for your doctor, or help you find the right doctor on our website.\n\n*(Please note: I am an AI helper, not a doctor. I give helpful advice, but cannot diagnose illnesses or prescribe medicine. In an emergency, free human help is always ready).*`,
+      text: `Hello ${user ? user.full_name.split(' ')[0] : 'there'}! I am **urCure AI**, your dedicated wellbeing companion.\n\nI can help explain assessment results, guide you through interactive box breathing (4-4-4-4), explain Abu Dhabi stepped-care pathways, or help you prepare questions for your healthcare professional.\n\n*(Clinical Safeguard: I am an AI wellbeing companion, not a licensed clinician. I do not diagnose conditions or prescribe medications. In an emergency, certified human support via 800-SAKINA and 999 is always available).*`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -98,12 +99,39 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
     setInput('');
     setLoading(true);
 
+    // Immediate Client-Side Safety Intercept for Crisis Disclosures
+    const lower = text.toLowerCase();
+    const crisisKeywords = ['suicide', 'kill myself', 'end my life', 'want to die', 'harm myself', 'انتحار', 'أموت', 'اذي نفسي'];
+    if (crisisKeywords.some(k => lower.includes(k))) {
+      setTimeout(() => {
+        const crisisMsg: ChatMessage = {
+          id: `crisis-${Date.now()}`,
+          sender: 'ai',
+          text: lang === 'ar' 
+            ? 'نحن نهتم بسلامتك بشدة. كذكاء اصطناعي، لا يمكنني تقديم رعاية طارئة، ولكن هناك دعم بشري مجاني وسري متاح لك في أبوظبي والإمارات الآن:'
+            : 'Your safety is our absolute priority. As an AI, I cannot provide emergency care, but compassionate, human support in Abu Dhabi and the UAE is available right now:',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          action: 'emergency_escalation',
+          crisisContacts: [
+            { name: '800-SAKINA (800-725462) Abu Dhabi Mental Health', number: '800725462', badge: 'Toll-Free 24/7' },
+            { name: 'UAE Emergency Police', number: '999', badge: 'Emergency' },
+            { name: 'National Ambulance', number: '998', badge: 'Medical SOS' },
+            { name: 'Estijaba Crisis Line (Abu Dhabi)', number: '8001717', badge: 'Toll-Free' }
+          ]
+        };
+        setMessages(prev => [...prev, crisisMsg]);
+        setLoading(false);
+        onOpenSOS();
+      }, 500);
+      return;
+    }
+
     try {
       const res = await api.chatWithAI(text);
       const aiMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: 'ai',
-        text: res.reply || 'I am here to assist with your wellbeing.',
+        text: res.reply || (lang === 'ar' ? 'أنا هنا لمساعدتك في عافيتك النفسية.' : 'I am here to assist with your wellbeing.'),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         action: res.action,
         suggestedDoctors: res.suggested_doctors,
@@ -120,7 +148,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
       const errorMsg: ChatMessage = {
         id: `err-${Date.now()}`,
         sender: 'ai',
-        text: 'I am having trouble connecting right now. Please try again in a moment.',
+        text: lang === 'ar' 
+          ? 'أواجه صعوبة في الاتصال حالياً. يرجى المحاولة بعد لحظات.' 
+          : 'I am having trouble connecting right now. Please try again in a moment.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -129,12 +159,21 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
     }
   };
 
-  const quickPrompts = [
+  const quickPromptsEn = [
     'Show me a calm breathing exercise',
-    'I feel very stressed today',
-    'Help me find a doctor for worry',
-    'What should I ask my doctor?'
+    'Explain my mood assessment results',
+    'Help me prepare questions for my doctor',
+    'Explain Abu Dhabi stepped-care pathways'
   ];
+
+  const quickPromptsAr = [
+    'ابدأ تمرين التنفس الهادئ (4-4-4-4)',
+    'اشرح لي نتائج فحص الحالة المزاجية',
+    'كيف أجهز أسئلة لموعد الطبيب؟',
+    'اشرح مستويات الرعاية المتدرجة في أبوظبي'
+  ];
+
+  const quickPrompts = lang === 'ar' ? quickPromptsAr : quickPromptsEn;
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 text-left">
@@ -156,14 +195,38 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
           </div>
         </div>
 
-        {/* SOS shortcut */}
-        <button
-          onClick={onOpenSOS}
-          className="self-start sm:self-auto px-3.5 py-1.5 rounded-lg text-xs font-mono uppercase bg-black border border-white/20 text-[#F5F5F5] hover:border-white transition-all flex items-center space-x-1.5 cursor-pointer"
-        >
-          <ShieldAlert className="w-3.5 h-3.5" />
-          <span>Emergency SOS</span>
-        </button>
+        <div className="flex items-center space-x-2 self-start sm:self-auto">
+          {/* Language Toggle */}
+          <div className="flex items-center rounded-lg bg-[#141414] border border-[#2b2b2b] p-0.5 text-xs font-mono">
+            <button
+              type="button"
+              onClick={() => setLang('en')}
+              className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                lang === 'en' ? 'bg-white text-black font-bold' : 'text-[#888] hover:text-white'
+              }`}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setLang('ar')}
+              className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                lang === 'ar' ? 'bg-white text-black font-bold' : 'text-[#888] hover:text-white'
+              }`}
+            >
+              العربية
+            </button>
+          </div>
+
+          {/* SOS shortcut */}
+          <button
+            onClick={onOpenSOS}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-mono uppercase bg-red-950/70 border border-red-700 text-red-200 hover:bg-red-900 transition-all flex items-center space-x-1.5 cursor-pointer shadow"
+          >
+            <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+            <span>800-SAKINA / 999</span>
+          </button>
+        </div>
       </div>
 
       {/* Interactive Box Breathing Visualizer (When active) */}
@@ -326,7 +389,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSend();
           }}
-          placeholder="Ask a question (e.g. 'I feel stressed', 'Help me find a doctor')..."
+          placeholder={lang === 'ar' ? "اكتب سؤالك هنا (مثل: 'أشعر بالتوتر'، 'اشرح لي مستويات الدعم')..." : "Ask a question (e.g. 'I feel stressed', 'Explain stepped care', 'Help prepare for my doctor')..."}
           className="w-full pl-4 pr-12 py-3.5 rounded-xl bg-[#111111] border border-[#292929] text-sm text-white placeholder-[#666] focus:outline-none focus:border-white/50"
         />
         <button
@@ -339,7 +402,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
       </div>
 
       <p className="text-[11px] text-[#666666] font-mono text-center">
-        urCure AI gives helpful advice. All messages are 100% private and confidential.
+        {lang === 'ar' 
+          ? 'مساعد ذكاء اصطناعي داعم للعافية. لا يقدم تشخيصات طبية ولا يحل محل الأطباء المرخصين. في حالات الطوارئ، اتصل بـ 800-SAKINA أو 999.' 
+          : 'Decision-support AI companion. Does not diagnose or replace licensed medical care. In emergencies, call 800-SAKINA or 999 immediately.'}
       </p>
 
     </div>

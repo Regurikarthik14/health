@@ -45,34 +45,39 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
 
   const contacts = [
     {
-      name: 'Abu Dhabi Police Emergency',
+      name: '800-SAKINA Mental Health Helpline',
+      number: '800-725462',
+      badge: 'Abu Dhabi 24/7 Hotline',
+      tier: 'mental_health',
+      desc: 'Official Abu Dhabi confidential mental-health hotline. Free 24/7 support for emotional distress, anxiety, and mental wellbeing crisis.'
+    },
+    {
+      name: 'UAE Emergency Services',
       number: '999',
       badge: 'Immediate Danger',
-      desc: 'Call for immediate police help if you or someone is in physical danger or needs protection.'
+      tier: 'emergency',
+      desc: 'Call immediately if you or someone near you is in physical danger or requires urgent police protection.'
     },
     {
       name: 'National Ambulance UAE',
       number: '998',
       badge: 'Medical Emergency',
-      desc: 'Call an ambulance right away for serious medical emergencies, injuries, or accidents.'
+      tier: 'emergency',
+      desc: 'Immediate dispatch for acute medical emergencies, sudden physical injury, or life-threatening health issues.'
     },
     {
-      name: 'Estijaba Health Helpline',
+      name: 'Estijaba Health Authority Crisis Line',
       number: '800 1717',
       badge: 'Health Authority (24/7)',
-      desc: 'Official free 24/7 hotline by Abu Dhabi Health Authority for urgent medical and emotional help.'
+      tier: 'mental_health',
+      desc: 'Official 24/7 helpline by Department of Health Abu Dhabi for health guidance and emotional support.'
     },
     {
-      name: 'HOPE Mental Health Line',
+      name: 'HOPE Support Helpline',
       number: '800-4673',
-      badge: 'Emotional Support',
-      desc: 'Free, private phone support to talk through anxiety, sadness, and overwhelming feelings.'
-    },
-    {
-      name: 'SEHA Public Hospitals Abu Dhabi',
-      number: '800 50',
-      badge: 'Public Hospitals',
-      desc: 'Connect directly with Abu Dhabi public hospitals for immediate patient admission and care.'
+      badge: 'Emotional Care',
+      tier: 'support',
+      desc: 'Free, compassionate phone counseling to talk through grief, sadness, and overwhelming thoughts.'
     }
   ];
 
@@ -100,40 +105,54 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
           </button>
         </div>
 
-        {/* Priority Clinical Safety Rule */}
-        <div className="p-4 rounded-xl bg-white/[0.05] border border-white/20 space-y-1.5">
-          <div className="flex items-center space-x-2 text-white text-xs font-semibold uppercase tracking-wider">
-            <AlertTriangle className="w-4 h-4 text-white" />
-            <span>Important Safety Note</span>
+        {/* Tiered Clinical Guidance */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <div className="p-3 rounded-xl bg-red-950/40 border border-red-800/60 space-y-1">
+            <span className="font-bold text-red-300 font-mono text-[10px] uppercase">Tier 1 • Immediate Danger</span>
+            <p className="text-[11px] text-red-200/90 leading-tight">
+              Life-threatening emergency, self-harm crisis, or severe physical harm. Call <strong>999</strong> or <strong>800-SAKINA</strong> now.
+            </p>
           </div>
-          <p className="text-xs text-[#C0C0C0] leading-relaxed">
-            If you or someone near you is in immediate physical danger or feeling overwhelmed, please <strong>do not wait for an ordinary appointment</strong>. 
-            Call these free emergency numbers right now.
-          </p>
+          <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-800/60 space-y-1">
+            <span className="font-bold text-amber-300 font-mono text-[10px] uppercase">Tier 2 • Elevated Concern</span>
+            <p className="text-[11px] text-amber-200/90 leading-tight">
+              Persistent anxiety, panic, or insomnia. Book a priority 30-minute doctor consult or talk to SAKINA counselors.
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-cyan-950/40 border border-cyan-800/60 space-y-1">
+            <span className="font-bold text-cyan-300 font-mono text-[10px] uppercase">Tier 3 • Emotional Distress</span>
+            <p className="text-[11px] text-cyan-200/90 leading-tight">
+              Temporary fatigue, work stress, or sadness. Try calm box breathing, sleep hygiene, or our 24/7 AI companion.
+            </p>
+          </div>
         </div>
 
-        {/* 1-Click Instant SOS Trigger */}
+        {/* 1-Click Human Crisis Registration */}
         {!sosTriggered ? (
-          <div className="p-6 rounded-2xl bg-[#111111] border border-[#292929] text-center space-y-3">
-            <h4 className="text-base font-bold text-white">Need Urgent Help Right Now?</h4>
-            <p className="text-xs text-[#929292] max-w-md mx-auto">
-              Press the button below to alert our on-call urgent support team and see direct numbers.
-            </p>
+          <div className="p-5 rounded-2xl bg-[#111111] border border-[#292929] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="space-y-1 text-left">
+              <h4 className="text-sm font-bold text-white">Log Crisis Alert with On-Call Clinical Team</h4>
+              <p className="text-xs text-[#929292] max-w-md">
+                Registers an urgent flag in your medical record for human clinical review. Note: For immediate physical dispatch, you must dial 999 directly.
+              </p>
+            </div>
             <button
               onClick={handleTriggerSOS}
               disabled={triggering}
-              className="px-8 py-3.5 rounded-xl text-sm font-bold text-black bg-white hover:bg-[#EAEAEA] transition-all shadow-[0_0_30px_rgba(255,255,255,0.3)] cursor-pointer disabled:opacity-50 inline-flex items-center space-x-2"
+              className="px-6 py-3 rounded-xl text-xs font-bold text-black bg-white hover:bg-[#EAEAEA] transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] cursor-pointer disabled:opacity-50 inline-flex items-center space-x-2 shrink-0"
             >
               <ShieldAlert className="w-4 h-4 text-black" />
-              <span>{triggering ? 'Sending Alert...' : 'Send SOS Alert'}</span>
+              <span>{triggering ? 'Registering...' : 'Log Human Crisis Alert'}</span>
             </button>
           </div>
         ) : (
-          <div className="p-5 rounded-2xl bg-white/[0.08] border border-white/40 space-y-2 text-center">
-            <CheckCircle2 className="w-7 h-7 text-white mx-auto" />
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider">Alert Sent Successfully</h4>
-            <p className="text-xs text-[#E0E0E0]">
-              Our support team has been notified {crisisEventId ? `(Event #${crisisEventId})` : ''}. Please call the direct numbers below immediately.
+          <div className="p-4 rounded-xl bg-white/[0.08] border border-white/40 space-y-1 text-left">
+            <div className="flex items-center space-x-2 text-white font-bold text-xs uppercase font-mono">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Human Crisis Incident Recorded {crisisEventId ? `(#${crisisEventId})` : ''}</span>
+            </div>
+            <p className="text-xs text-[#CCC]">
+              Your alert is logged for our medical director. Please dial <strong>800-SAKINA (800-725462)</strong> or <strong>999</strong> directly below if you are in immediate distress.
             </p>
           </div>
         )}

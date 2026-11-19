@@ -13,7 +13,8 @@ import {
   Moon, 
   Clock,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  PhoneCall
 } from 'lucide-react';
 import { api } from '../../services/api';
 import type { Assessment, AssessmentInstrument } from '../../types';
@@ -492,6 +493,44 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({
                     );
                   })}
                 </div>
+
+                {/* Immediate Safety Workflow for PHQ-9 Question 9 (Self-Harm Disclosure) */}
+                {selectedType === 'PHQ-9' && questions[currentStep]?.id === 'q9' && (answers['q9']?.score ?? 0) > 0 && (
+                  <div className="p-5 rounded-2xl bg-red-950/70 border border-red-700 space-y-3.5 text-left shadow-2xl animate-fade-in">
+                    <div className="flex items-center space-x-2 text-red-200">
+                      <ShieldAlert className="w-5 h-5 text-red-400 shrink-0" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider font-mono">
+                        Immediate Human Crisis Support Is Ready For You
+                      </h4>
+                    </div>
+                    <p className="text-xs text-red-100/90 leading-relaxed">
+                      Your life and safety matter. You do not need to wait to finish this quiz. If you are having thoughts of hurting yourself, free, 100% confidential human support in Abu Dhabi and the UAE is available right now:
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <a
+                        href="tel:800725462"
+                        className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] flex items-center space-x-1.5 shadow"
+                      >
+                        <PhoneCall className="w-3.5 h-3.5" />
+                        <span>Call 800-SAKINA (800-725462)</span>
+                      </a>
+                      <a
+                        href="tel:999"
+                        className="px-4 py-2 rounded-xl bg-red-600 text-white font-bold text-xs hover:bg-red-700 flex items-center space-x-1.5 shadow"
+                      >
+                        <PhoneCall className="w-3.5 h-3.5" />
+                        <span>Emergency: 999</span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={onOpenSOS}
+                        className="px-3.5 py-2 rounded-xl bg-black/60 border border-red-800 text-white font-mono text-xs hover:bg-black/90 cursor-pointer"
+                      >
+                        Open Crisis Protocol
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Nav buttons */}
                 <div className="flex items-center justify-between pt-4 border-t border-[#292929]">

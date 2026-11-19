@@ -23,20 +23,25 @@ import {
   DollarSign,
   AlertTriangle,
   ChevronRight,
-  ClipboardList
+  ClipboardList,
+  Compass,
+  UserCheck,
+  CheckSquare
 } from 'lucide-react';
 import { api } from '../../services/api';
-import type { Appointment, HealthBlock, Doctor } from '../../types';
+import type { Appointment, HealthBlock, Doctor, Referral } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { HealthBlockDetailModal } from '../health-blocks/HealthBlockDetailModal';
 
 export const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'queue' | 'appointments' | 'cases' | 'notes' | 'availability' | 'credentials'>('queue');
+  const [activeTab, setActiveTab] = useState<'queue' | 'referrals' | 'appointments' | 'cases' | 'notes' | 'availability' | 'credentials'>('queue');
   const [stats, setStats] = useState<any>(null);
   const [todayApps, setTodayApps] = useState<Appointment[]>([]);
   const [allAppointments, setAllAppointments] = useState<Appointment[]>([]);
   const [healthBlocks, setHealthBlocks] = useState<HealthBlock[]>([]);
+  const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [referralStatusUpdating, setReferralStatusUpdating] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Search & filter in appointments tab
@@ -69,16 +74,18 @@ export const DoctorDashboard: React.FC = () => {
   const loadDoctorData = async () => {
     setLoading(true);
     try {
-      const [statsRes, appsRes, blocksRes] = await Promise.all([
+      const [statsRes, appsRes, blocksRes, refRes] = await Promise.all([
         api.getDoctorDashboardStats().catch(() => ({ stats: {}, today_appointments: [], upcoming_appointments: [] })),
         api.getMyAppointments().catch(() => ({ appointments: [] })),
-        api.getMyHealthBlocks().catch(() => ({ health_blocks: [] }))
+        api.getMyHealthBlocks().catch(() => ({ health_blocks: [] })),
+        api.getDoctorReferrals().catch(() => ({ referrals: [] }))
       ]);
 
       setStats(statsRes.stats || {});
       setTodayApps(statsRes.today_appointments || []);
       setAllAppointments(appsRes.appointments || []);
       setHealthBlocks(blocksRes.health_blocks || []);
+      setReferrals(refRes.referrals || []);
 
       if (statsRes.today_appointments && statsRes.today_appointments.length > 0 && !selectedAppForNote) {
         setSelectedAppForNote(statsRes.today_appointments[0]);
@@ -89,6 +96,21 @@ export const DoctorDashboard: React.FC = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateReferralStatus = async (referralId: number, newStatus: string, notes?: string) => {
+    setReferralStatusUpdating(true);
+    try {
+      await api.updateReferralStatus(referralId, {
+        status: newStatus,
+        notes: notes || 'Status updated by attending physician'
+      });
+      await loadDoctorData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update referral status');
+    } finally {
+      setReferralStatusUpdating(false);
     }
   };
 
@@ -169,8 +191,11 @@ export const DoctorDashboard: React.FC = () => {
     setBlockModalOpen(true);
   };
 
+  const pendingReferrals = referrals.filter(r => r.status === 'submitted' || r.status === 'awaiting_review');
+
   const navTabs = [
     { id: 'queue', label: "Today's Queue", badge: todayApps.length > 0 ? todayApps.length : null },
+    { id: 'referrals', label: 'Incoming Referrals', badge: pendingReferrals.length > 0 ? pendingReferrals.length : null },
     { id: 'appointments', label: 'All Patient Visits', badge: allAppointments.length > 0 ? allAppointments.length : null },
     { id: 'cases', label: 'Patient Health Cases', badge: healthBlocks.length > 0 ? healthBlocks.length : null },
     { id: 'notes', label: 'Document Clinical Notes (SOAP)', badge: null },
@@ -304,17 +329,17 @@ export const DoctorDashboard: React.FC = () => {
         </div>
 
         <div 
-          onClick={() => setActiveTab('credentials')}
+          onClick={() => setActiveTab('referrals')}
           className="p-5 rounded-2xl bg-[#0D0D0D] border border-[#222] hover:border-white/40 transition-all cursor-pointer space-y-1 group"
         >
           <div className="flex items-center justify-between text-xs font-mono text-[#777]">
-            <span>Consultation Fee</span>
-            <Award className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+            <span>Pending Referrals</span>
+            <Compass className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
           </div>
           <div className="text-3xl font-bold text-white font-mono">
-            AED {stats?.consultation_fee || 250}
+            {pendingReferrals.length}
           </div>
-          <p className="text-[11px] text-[#888]">Per 30-min consultation</p>
+          <p className="text-[11px] text-[#888]">Awaiting triage & scheduling</p>
         </div>
 
       </div>
@@ -427,6 +452,191 @@ export const DoctorDashboard: React.FC = () => {
                         Document Note (SOAP)
                       </button>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB: INCOMING REFERRALS & STEPPED-CARE TRIAGE             */}
+        {/* ========================================================= */}
+        {activeTab === 'referrals' && (
+          <div className="space-y-6">
+            <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#242424] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-mono uppercase text-[#777]">Care Coordination Queue</span>
+                <h3 className="text-lg font-bold text-white mt-0.5">
+                  Stepped-Care Referral Review & Triage
+                </h3>
+                <p className="text-xs text-[#888] mt-1">
+                  Review incoming referrals, consented patient assessments (PHQ-9 / GAD-7), and coordinate appointment requests.
+                </p>
+              </div>
+              <span className="text-xs font-mono text-[#888] bg-[#121212] px-3 py-1.5 rounded-lg border border-[#222] self-start sm:self-auto">
+                {referrals.length} Total Referrals
+              </span>
+            </div>
+
+            {referrals.length === 0 ? (
+              <div className="p-12 text-center rounded-2xl bg-[#0D0D0D] border border-[#222] space-y-3">
+                <Compass className="w-8 h-8 text-[#555] mx-auto" />
+                <h4 className="text-sm font-semibold text-white">No Referrals in Queue</h4>
+                <p className="text-xs text-[#777] max-w-sm mx-auto">
+                  When patients request stepped-care support or referrals from verified questionnaires, they will appear here for your clinical triage.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {referrals.map((ref) => (
+                  <div
+                    key={ref.id}
+                    className="p-6 rounded-2xl bg-[#0D0D0D] border border-[#262626] hover:border-white/30 transition-all space-y-4 text-left shadow-lg"
+                  >
+                    {/* Top referral meta */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#202020]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-mono font-bold bg-white text-black px-2.5 py-0.5 rounded shadow">
+                          {ref.referral_code}
+                        </span>
+                        <h4 className="text-sm font-bold text-white">
+                          {ref.patient_name || `Patient #${ref.patient_id}`}
+                        </h4>
+                        <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-950/70 text-cyan-300 border border-cyan-800">
+                          Stepped Level {ref.stepped_care_level}
+                        </span>
+                        <span className="text-[10px] font-mono text-[#777]">
+                          Received: {new Date(ref.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      <span className={`text-xs font-mono uppercase px-3 py-1 rounded-full border self-start sm:self-auto ${
+                        ref.status === 'completed'
+                          ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800'
+                          : ref.status === 'accepted' || ref.status === 'appointment_confirmed'
+                          ? 'bg-cyan-950/70 text-cyan-300 border-cyan-800'
+                          : 'bg-amber-950/70 text-amber-300 border-amber-800'
+                      }`}>
+                        {ref.status.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+
+                    {/* Patient Consented Clinical Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                      
+                      <div className="p-4 rounded-xl bg-[#121212] border border-[#222] space-y-1.5">
+                        <span className="text-[10px] font-mono uppercase text-[#777] block">Consented Assessment Data</span>
+                        <div className="flex items-center space-x-2">
+                          <Activity className="w-4 h-4 text-cyan-400" />
+                          <strong className="text-white text-sm">
+                            {ref.latest_assessment_type || 'PHQ-9 Mood Check'}
+                          </strong>
+                        </div>
+                        <div className="text-[#aaa] font-mono text-xs">
+                          Score: <strong className="text-white">{ref.latest_score ?? 3} / 27</strong>
+                        </div>
+                        <div className="text-[11px] text-[#888]">
+                          Severity: <span className="uppercase text-amber-300">{ref.latest_severity || 'Mild'}</span>
+                        </div>
+                        <div className="pt-1 text-[10px] text-emerald-400 font-mono flex items-center space-x-1">
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span>Informed Patient Consent Confirmed</span>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-xl bg-[#121212] border border-[#222] space-y-1.5">
+                        <span className="text-[10px] font-mono uppercase text-[#777] block">Referral Target & Category</span>
+                        <div className="text-white font-semibold text-sm">{ref.provider_name}</div>
+                        <div className="text-[#888]">{ref.clinical_category || 'Primary Mental Wellbeing'}</div>
+                        {ref.reason && (
+                          <div className="text-xs text-[#bbb] pt-1">
+                            <em>Patient notes:</em> "{ref.reason}"
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-4 rounded-xl bg-[#121212] border border-[#222] space-y-1.5">
+                        <span className="text-[10px] font-mono uppercase text-[#777] block">Closed-Loop Status</span>
+                        {ref.patient_confirmed_care ? (
+                          <div className="space-y-1 text-emerald-300">
+                            <div className="flex items-center space-x-1.5 font-bold">
+                              <CheckCircle className="w-4 h-4 text-emerald-400" />
+                              <span>Care Confirmed by Patient</span>
+                            </div>
+                            <p className="text-[11px] text-emerald-200/80">
+                              {ref.patient_confirmation_notes || 'Patient verified receipt of care.'}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="text-[#888] space-y-1">
+                            <span className="text-amber-300/90 font-mono block">Pending Patient Verification</span>
+                            <p className="text-[11px] text-[#777]">
+                              Loop closes when patient confirms receiving care in their dashboard.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+
+                    {/* Doctor Action Controls */}
+                    <div className="pt-3 border-t border-[#202020] flex flex-wrap items-center justify-between gap-3">
+                      <div className="text-xs text-[#777] font-mono">
+                        Clinical Oversight: Select action to coordinate referral
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        {ref.status !== 'accepted' && ref.status !== 'appointment_confirmed' && ref.status !== 'completed' && (
+                          <button
+                            disabled={referralStatusUpdating}
+                            onClick={() => handleUpdateReferralStatus(ref.id, 'accepted', 'Physician accepted referral request.')}
+                            className="px-3.5 py-1.5 rounded-lg bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] cursor-pointer shadow"
+                          >
+                            Accept Referral
+                          </button>
+                        )}
+
+                        {ref.status !== 'appointment_requested' && ref.status !== 'appointment_confirmed' && ref.status !== 'completed' && (
+                          <button
+                            disabled={referralStatusUpdating}
+                            onClick={() => handleUpdateReferralStatus(ref.id, 'appointment_requested', 'Coordinator requested appointment slot.')}
+                            className="px-3.5 py-1.5 rounded-lg bg-[#181818] text-white hover:bg-[#252525] border border-[#333] text-xs font-mono cursor-pointer"
+                          >
+                            Request Visit
+                          </button>
+                        )}
+
+                        {ref.status !== 'appointment_confirmed' && ref.status !== 'completed' && (
+                          <button
+                            disabled={referralStatusUpdating}
+                            onClick={() => handleUpdateReferralStatus(ref.id, 'appointment_confirmed', 'Appointment confirmed with patient.')}
+                            className="px-3.5 py-1.5 rounded-lg bg-cyan-950/70 text-cyan-200 hover:bg-cyan-900 border border-cyan-800 text-xs font-mono cursor-pointer"
+                          >
+                            Confirm Visit
+                          </button>
+                        )}
+
+                        {ref.status !== 'completed' && (
+                          <button
+                            disabled={referralStatusUpdating}
+                            onClick={() => handleUpdateReferralStatus(ref.id, 'completed', 'Clinical consultation delivered.')}
+                            className="px-3.5 py-1.5 rounded-lg bg-emerald-950/70 text-emerald-200 hover:bg-emerald-900 border border-emerald-800 text-xs font-mono cursor-pointer"
+                          >
+                            Mark Completed
+                          </button>
+                        )}
+
+                        <button
+                          disabled={referralStatusUpdating}
+                          onClick={() => handleUpdateReferralStatus(ref.id, 'alternative_support_required', 'Redirected to alternate stepped care service.')}
+                          className="px-3 py-1.5 rounded-lg bg-red-950/40 text-red-300 hover:bg-red-900/60 border border-red-900 text-xs font-mono cursor-pointer"
+                        >
+                          Redirect
+                        </button>
+                      </div>
+                    </div>
+
                   </div>
                 ))}
               </div>

@@ -27,10 +27,14 @@ import {
   Sparkles,
   User as UserIcon,
   HelpCircle,
-  Filter
+  Filter,
+  CheckCircle2,
+  Compass,
+  Sun,
+  Zap
 } from 'lucide-react';
 import { api } from '../../services/api';
-import type { Appointment, Assessment, ClinicalRecord, HealthBlock, Doctor } from '../../types';
+import type { Appointment, Assessment, ClinicalRecord, HealthBlock, Doctor, Referral, EarlyWarningStatus } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { BodyAreaSymptomGuide } from '../health-blocks/BodyAreaSymptomGuide';
 import { HealthBlockDetailModal } from '../health-blocks/HealthBlockDetailModal';
@@ -54,7 +58,24 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [clinicalRecords, setClinicalRecords] = useState<ClinicalRecord[]>([]);
   const [healthBlocks, setHealthBlocks] = useState<HealthBlock[]>([]);
+  const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [earlyWarning, setEarlyWarning] = useState<EarlyWarningStatus | null>(null);
+  const [warningDismissed, setWarningDismissed] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
+
+  // Daily Check-In state
+  const [dailyFeeling, setDailyFeeling] = useState<string>('Good');
+  const [dailyStress, setDailyStress] = useState<string>('Mild');
+  const [dailySleepQuality, setDailySleepQuality] = useState<string>('Okay');
+  const [dailyEnergyLevel, setDailyEnergyLevel] = useState<string>('Moderate');
+  const [dailyWantSupport, setDailyWantSupport] = useState<string>('No, feeling fine');
+  const [dailyCheckinSubmitted, setDailyCheckinSubmitted] = useState<boolean>(false);
+  const [submittingCheckin, setSubmittingCheckin] = useState<boolean>(false);
+
+  // Closed-loop care confirmation
+  const [confirmCareTarget, setConfirmCareTarget] = useState<Referral | null>(null);
+  const [confirmCareNotes, setConfirmCareNotes] = useState<string>('');
+  const [confirmCareLoading, setConfirmCareLoading] = useState<boolean>(false);
 
   // Filter states
   const [visitFilter, setVisitFilter] = useState<'all' | 'upcoming' | 'past'>('upcoming');
@@ -73,16 +94,20 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [appRes, assessRes, recordsRes, blocksRes] = await Promise.all([
+      const [appRes, assessRes, recordsRes, blocksRes, refRes, earlyRes] = await Promise.all([
         api.getMyAppointments().catch(() => ({ appointments: [] })),
         api.getAssessmentHistory().catch(() => ({ assessments: [] })),
         api.getClinicalRecords().catch(() => ({ records: [] })),
-        api.getMyHealthBlocks().catch(() => ({ health_blocks: [] }))
+        api.getMyHealthBlocks().catch(() => ({ health_blocks: [] })),
+        api.getMyReferrals().catch(() => ({ referrals: [] })),
+        api.getEarlyWarningStatus().catch(() => ({ early_warning: null }))
       ]);
       setAppointments(appRes.appointments || []);
       setAssessments(assessRes.assessments || []);
       setClinicalRecords(recordsRes.records || []);
       setHealthBlocks(blocksRes.health_blocks || []);
+      setReferrals(refRes.referrals || []);
+      setEarlyWarning(earlyRes.early_warning || null);
     } catch (err) {
       console.error(err);
     } finally {
@@ -107,6 +132,49 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
     }
   };
 
+  const handleDailyCheckinSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingCheckin(true);
+    try {
+      const moodMap: Record<string, number> = { 'Struggling': 1, 'Low': 2, 'Okay': 3, 'Good': 4, 'Great': 5 };
+      const energyMap: Record<string, number> = { 'Depleted': 1, 'Low': 2, 'Moderate': 3, 'High': 4, 'Peak': 5 };
+      const sleepMap: Record<string, number> = { 'Barely Slept': 3.5, 'Disturbed': 5.5, 'Okay': 7.0, 'Deep & Restful': 8.5 };
+
+      await api.recordMoodCheckin({
+        mood_score: moodMap[dailyFeeling] || 4,
+        energy_score: energyMap[dailyEnergyLevel] || 3,
+        sleep_hours: sleepMap[dailySleepQuality] || 7.0,
+        note: `Daily Check-In: Feeling=${dailyFeeling}, Stress=${dailyStress}, Sleep=${dailySleepQuality}, Energy=${dailyEnergyLevel}, Support=${dailyWantSupport}`
+      });
+      setDailyCheckinSubmitted(true);
+      await loadDashboardData();
+      setTimeout(() => setDailyCheckinSubmitted(false), 4000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmittingCheckin(false);
+    }
+  };
+
+  const handleConfirmCareSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!confirmCareTarget) return;
+    setConfirmCareLoading(true);
+    try {
+      await api.confirmPatientCare(confirmCareTarget.id, {
+        confirmed: true,
+        notes: confirmCareNotes.trim() || 'Patient confirmed receiving care from the designated provider.'
+      });
+      setConfirmCareTarget(null);
+      setConfirmCareNotes('');
+      await loadDashboardData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to confirm care.');
+    } finally {
+      setConfirmCareLoading(false);
+    }
+  };
+
   const upcomingAppointments = appointments.filter(a => a.status === 'confirmed' || a.status === 'rescheduled');
   const pastAppointments = appointments.filter(a => a.status === 'completed' || a.status === 'cancelled');
   const nextVisit = upcomingAppointments[0] || null;
@@ -114,6 +182,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const latestAssessment = assessments[0];
   const activeHealthBlocks = healthBlocks.filter(b => b.status !== 'resolved' && b.status !== 'closed');
   const resolvedHealthBlocks = healthBlocks.filter(b => b.status === 'resolved' || b.status === 'closed');
+  const pendingCareReferrals = referrals.filter(r => !r.patient_confirmed_care);
 
   const openBlockDetails = (ref: string) => {
     setSelectedBlockRef(ref);
@@ -124,6 +193,8 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
 
   const navTabs = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, badge: null },
+    { id: 'daily-checkin', label: 'Daily Check-In', icon: Sparkles, badge: dailyCheckinSubmitted ? 'Done' : null },
+    { id: 'referrals', label: 'Stepped Referrals', icon: Compass, badge: pendingCareReferrals.length > 0 ? pendingCareReferrals.length : null },
     { id: 'health-blocks', label: 'Health Blocks & Symptoms', icon: ShieldCheck, badge: activeHealthBlocks.length > 0 ? activeHealthBlocks.length : null },
     { id: 'appointments', label: 'Visits & Telehealth', icon: Calendar, badge: upcomingAppointments.length > 0 ? upcomingAppointments.length : null },
     { id: 'records', label: 'Doctor Notes & Rx', icon: FileText, badge: clinicalRecords.length > 0 ? clinicalRecords.length : null },
@@ -240,6 +311,238 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
         {/* ========================================================= */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
+
+            {/* 1. PERSONAL WELLBEING EARLY-WARNING DECISION-SUPPORT */}
+            {earlyWarning?.has_warning && !warningDismissed && (
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-purple-950/40 via-cyan-950/20 to-black border border-purple-500/40 shadow-2xl space-y-4 animate-fade-in text-left">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-purple-500/20">
+                  <div className="flex items-center space-x-2 text-cyan-300">
+                    <Activity className="w-4 h-4 text-cyan-400" />
+                    <span className="text-xs font-bold uppercase font-mono tracking-wider">
+                      Personal Wellbeing Early-Warning Insight
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-200 border border-purple-500/30">
+                      Stepped Care Level {earlyWarning.recommended_care_level} Recommended
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setWarningDismissed(true)}
+                      className="text-xs font-mono text-[#888] hover:text-white cursor-pointer px-2 py-0.5"
+                    >
+                      Dismiss ✕
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-white leading-relaxed">
+                    {earlyWarning.explanation}
+                  </p>
+                  <p className="text-xs text-[#aaa] leading-relaxed">
+                    {earlyWarning.suggested_action}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => onNavigateTab('services')}
+                    className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] transition-all cursor-pointer flex items-center space-x-1.5 shadow"
+                  >
+                    <span>Explore Stepped Support</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('daily-checkin')}
+                    className="px-3.5 py-2 rounded-xl bg-[#141414] text-white hover:bg-[#202020] text-xs font-mono border border-[#333] cursor-pointer"
+                  >
+                    Log Today's Check-In
+                  </button>
+                  <span className="text-[10px] text-[#777] font-mono ml-auto">
+                    Comparing against your personal baseline • Not an AI diagnosis
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* 2. TODAY'S WELLBEING CHECK-IN WIDGET */}
+            <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#242424] space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#202020] gap-2">
+                <div className="flex items-center space-x-2">
+                  <Sparkles className="w-4 h-4 text-cyan-400" />
+                  <h3 className="text-sm font-bold text-white uppercase font-mono tracking-wider">
+                    Today's Wellbeing Check-In
+                  </h3>
+                </div>
+                <span className="text-[11px] font-mono text-[#777]">
+                  {dailyCheckinSubmitted ? '✓ Saved for Today' : 'Optional 30-Second Check'}
+                </span>
+              </div>
+
+              {dailyCheckinSubmitted ? (
+                <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-800 text-emerald-200 text-xs flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Thank you! Your daily check-in has been securely saved to your personal baseline.</span>
+                </div>
+              ) : (
+                <form onSubmit={handleDailyCheckinSubmit} className="space-y-4 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    
+                    {/* Q1: Mood */}
+                    <div className="space-y-1.5 p-3 rounded-xl bg-[#121212] border border-[#222]">
+                      <span className="text-[11px] text-[#888] font-mono block">1. How are you feeling?</span>
+                      <select
+                        value={dailyFeeling}
+                        onChange={(e) => setDailyFeeling(e.target.value)}
+                        className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg p-2 focus:outline-none text-xs"
+                      >
+                        <option value="Great">Great (High Energy / Joy)</option>
+                        <option value="Good">Good (Balanced)</option>
+                        <option value="Okay">Okay (Managing)</option>
+                        <option value="Low">Low (Sad or Down)</option>
+                        <option value="Struggling">Struggling (Heavy / Overwhelmed)</option>
+                      </select>
+                    </div>
+
+                    {/* Q2: Stress */}
+                    <div className="space-y-1.5 p-3 rounded-xl bg-[#121212] border border-[#222]">
+                      <span className="text-[11px] text-[#888] font-mono block">2. How stressed do you feel?</span>
+                      <select
+                        value={dailyStress}
+                        onChange={(e) => setDailyStress(e.target.value)}
+                        className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg p-2 focus:outline-none text-xs"
+                      >
+                        <option value="None">None (Peaceful)</option>
+                        <option value="Mild">Mild (Manageable)</option>
+                        <option value="Moderate">Moderate (Noticeable tension)</option>
+                        <option value="High">High (Significant pressure)</option>
+                      </select>
+                    </div>
+
+                    {/* Q3: Sleep */}
+                    <div className="space-y-1.5 p-3 rounded-xl bg-[#121212] border border-[#222]">
+                      <span className="text-[11px] text-[#888] font-mono block">3. How was your sleep?</span>
+                      <select
+                        value={dailySleepQuality}
+                        onChange={(e) => setDailySleepQuality(e.target.value)}
+                        className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg p-2 focus:outline-none text-xs"
+                      >
+                        <option value="Deep & Restful">Deep & Restful (8+ hrs)</option>
+                        <option value="Okay">Okay (6 - 7 hrs)</option>
+                        <option value="Disturbed">Disturbed / Woke up often</option>
+                        <option value="Barely Slept">Barely Slept (&lt; 4 hrs)</option>
+                      </select>
+                    </div>
+
+                    {/* Q4: Energy */}
+                    <div className="space-y-1.5 p-3 rounded-xl bg-[#121212] border border-[#222]">
+                      <span className="text-[11px] text-[#888] font-mono block">4. How is your energy?</span>
+                      <select
+                        value={dailyEnergyLevel}
+                        onChange={(e) => setDailyEnergyLevel(e.target.value)}
+                        className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg p-2 focus:outline-none text-xs"
+                      >
+                        <option value="Peak">Peak (Ready for the day)</option>
+                        <option value="Moderate">Moderate (Normal)</option>
+                        <option value="Low">Low (Tired easily)</option>
+                        <option value="Depleted">Depleted (Exhausted)</option>
+                      </select>
+                    </div>
+
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                    <p className="text-[11px] text-[#666] font-mono">
+                      All questions are optional. Zero microphone, camera, or behavioural tracking.
+                    </p>
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setDailyCheckinSubmitted(true)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-mono text-[#888] hover:text-white cursor-pointer"
+                      >
+                        Skip for Today
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={submittingCheckin}
+                        className="px-5 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] cursor-pointer shadow"
+                      >
+                        {submittingCheckin ? 'Saving...' : 'Save Check-In'}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              )}
+            </div>
+
+            {/* 3. STEPPED CARE REFERRAL TRACKER */}
+            {referrals.length > 0 && (
+              <div className="p-6 rounded-2xl bg-[#0B0B0B] border border-[#242424] space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[#202020]">
+                  <div className="flex items-center space-x-2">
+                    <Compass className="w-4 h-4 text-cyan-400" />
+                    <h3 className="text-sm font-bold text-white uppercase font-mono tracking-wider">
+                      Stepped Care Referral Coordination
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('referrals')}
+                    className="text-xs font-mono text-[#888] hover:text-white underline cursor-pointer"
+                  >
+                    View All ({referrals.length}) →
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {referrals.slice(0, 2).map((ref) => (
+                    <div
+                      key={ref.id}
+                      className="p-4 rounded-xl bg-[#121212] border border-[#242424] flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[10px] font-mono text-white bg-white/10 px-2 py-0.5 rounded border border-white/20">
+                            {ref.referral_code}
+                          </span>
+                          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-950/70 text-cyan-300 border border-cyan-800">
+                            Level {ref.stepped_care_level}
+                          </span>
+                          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-white/5 text-[#aaa] border border-white/10">
+                            Status: {ref.status.replace(/_/g, ' ')}
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-bold text-white">{ref.provider_name}</h4>
+                        {ref.reason && <p className="text-xs text-[#888]">{ref.reason}</p>}
+                      </div>
+
+                      <div className="flex items-center space-x-2 shrink-0">
+                        {ref.patient_confirmed_care ? (
+                          <span className="px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-300 text-xs font-mono flex items-center space-x-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Care Confirmed by You</span>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setConfirmCareTarget(ref);
+                              setConfirmCareNotes('');
+                            }}
+                            className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] transition-all cursor-pointer shadow"
+                          >
+                            Confirm Care Received
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Next Upcoming Appointment Spotlight */}
             {nextVisit && (
@@ -913,6 +1216,322 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
         )}
 
         {/* ========================================================= */}
+        {/* TAB 2: DAILY WELLBEING CHECK-IN                           */}
+        {/* ========================================================= */}
+        {activeTab === 'daily-checkin' && (
+          <div className="p-6 sm:p-8 rounded-2xl bg-[#0B0B0B] border border-[#242424] space-y-8 text-left">
+            <div className="space-y-2 border-b border-[#202020] pb-5">
+              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-[#AAA]">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Daily Self-Reflection • Optional & Private</span>
+              </div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">
+                Daily Wellbeing Check-In
+              </h2>
+              <p className="text-xs sm:text-sm text-[#888] max-w-2xl leading-relaxed">
+                Take 30 seconds to reflect on your energy and stress. This helps our early-warning engine notice subtle changes over time. You are welcome to skip any question.
+              </p>
+            </div>
+
+            {dailyCheckinSubmitted ? (
+              <div className="p-8 rounded-2xl bg-emerald-950/40 border border-emerald-800 text-center space-y-4">
+                <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
+                <h3 className="text-lg font-bold text-white">Daily Check-In Recorded</h3>
+                <p className="text-xs text-emerald-200/90 max-w-md mx-auto">
+                  Your baseline has been updated. If your stress or sleep patterns change over time, gentle support recommendations will be suggested in your dashboard.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('overview')}
+                  className="px-6 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] cursor-pointer shadow"
+                >
+                  Return to Dashboard Overview
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleDailyCheckinSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  {/* 1. Mood */}
+                  <div className="p-5 rounded-xl bg-[#121212] border border-[#222] space-y-3">
+                    <label className="text-xs font-bold text-white uppercase font-mono block">
+                      1. How are you feeling today?
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {['Great', 'Good', 'Okay', 'Low', 'Struggling'].map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => setDailyFeeling(opt)}
+                          className={`p-3 rounded-xl border text-xs font-semibold text-left transition-all cursor-pointer ${
+                            dailyFeeling === opt
+                              ? 'bg-white text-black border-white shadow'
+                              : 'bg-[#181818] border-[#292929] text-[#888] hover:text-white'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 2. Stress */}
+                  <div className="p-5 rounded-xl bg-[#121212] border border-[#222] space-y-3">
+                    <label className="text-xs font-bold text-white uppercase font-mono block">
+                      2. How stressed do you feel?
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['None', 'Mild', 'Moderate', 'High'].map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => setDailyStress(opt)}
+                          className={`p-3 rounded-xl border text-xs font-semibold text-left transition-all cursor-pointer ${
+                            dailyStress === opt
+                              ? 'bg-white text-black border-white shadow'
+                              : 'bg-[#181818] border-[#292929] text-[#888] hover:text-white'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 3. Sleep */}
+                  <div className="p-5 rounded-xl bg-[#121212] border border-[#222] space-y-3">
+                    <label className="text-xs font-bold text-white uppercase font-mono block">
+                      3. How was your sleep last night?
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['Deep & Restful', 'Okay', 'Disturbed', 'Barely Slept'].map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => setDailySleepQuality(opt)}
+                          className={`p-3 rounded-xl border text-xs font-semibold text-left transition-all cursor-pointer ${
+                            dailySleepQuality === opt
+                              ? 'bg-white text-black border-white shadow'
+                              : 'bg-[#181818] border-[#292929] text-[#888] hover:text-white'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 4. Energy */}
+                  <div className="p-5 rounded-xl bg-[#121212] border border-[#222] space-y-3">
+                    <label className="text-xs font-bold text-white uppercase font-mono block">
+                      4. How is your energy level?
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['Peak', 'Moderate', 'Low', 'Depleted'].map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => setDailyEnergyLevel(opt)}
+                          className={`p-3 rounded-xl border text-xs font-semibold text-left transition-all cursor-pointer ${
+                            dailyEnergyLevel === opt
+                              ? 'bg-white text-black border-white shadow'
+                              : 'bg-[#181818] border-[#292929] text-[#888] hover:text-white'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* 5. Support Option */}
+                <div className="p-5 rounded-xl bg-[#121212] border border-[#222] space-y-3">
+                  <label className="text-xs font-bold text-white uppercase font-mono block">
+                    5. Would you like support or guidance today?
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {[
+                      'No, feeling fine',
+                      'Yes, self-help calming tools',
+                      'Yes, speak with a doctor or counselor'
+                    ].map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => setDailyWantSupport(opt)}
+                        className={`p-3 rounded-xl border text-xs font-semibold text-left transition-all cursor-pointer ${
+                          dailyWantSupport === opt
+                            ? 'bg-white text-black border-white shadow'
+                            : 'bg-[#181818] border-[#292929] text-[#888] hover:text-white'
+                        }`}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-[#202020]">
+                  <span className="text-[11px] text-[#666] font-mono">
+                    Zero telemetry. Stored securely under your patient medical ledger.
+                  </span>
+                  <div className="flex items-center space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('overview')}
+                      className="px-4 py-2 rounded-xl text-xs font-mono text-[#888] hover:text-white cursor-pointer"
+                    >
+                      Skip For Now
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submittingCheckin}
+                      className="px-6 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] cursor-pointer shadow transition-all"
+                    >
+                      {submittingCheckin ? 'Saving Check-In...' : 'Save Check-In'}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB 3: CLOSED-LOOP STEPPED CARE REFERRALS                  */}
+        {/* ========================================================= */}
+        {activeTab === 'referrals' && (
+          <div className="p-6 sm:p-8 rounded-2xl bg-[#0B0B0B] border border-[#242424] space-y-6 text-left">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#202020] gap-3">
+              <div>
+                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-[#AAA]">
+                  <Compass className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Closed-Loop Healthcare Coordination</span>
+                </div>
+                <h2 className="text-2xl font-bold text-white tracking-tight mt-2">
+                  My Stepped Care Referrals
+                </h2>
+                <p className="text-xs text-[#888] mt-0.5">
+                  Track your referral reviews, scheduled care, and confirm when support has been received.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onNavigateTab('services')}
+                className="px-4 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] transition-all cursor-pointer flex items-center space-x-1.5 shadow self-start sm:self-auto"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Find New Support Level</span>
+              </button>
+            </div>
+
+            {referrals.length === 0 ? (
+              <div className="p-12 rounded-2xl bg-[#0D0D0D] border border-[#222] text-center space-y-3">
+                <Compass className="w-10 h-10 text-[#555] mx-auto" />
+                <h4 className="text-base font-semibold text-white">No Referrals Requested Yet</h4>
+                <p className="text-xs text-[#888] max-w-md mx-auto">
+                  When you complete a mood check or select a specialist from our Stepped-Care Navigation, your consented referral will appear here for closed-loop coordination.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onNavigateTab('services')}
+                  className="px-5 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] cursor-pointer inline-flex items-center space-x-1.5"
+                >
+                  <span>Explore Stepped-Care Navigation</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {referrals.map((ref) => (
+                  <div
+                    key={ref.id}
+                    className="p-6 rounded-2xl bg-[#0D0D0D] border border-[#262626] hover:border-white/30 transition-all space-y-4"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#202020]">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs font-mono font-bold text-white bg-white/10 px-2.5 py-1 rounded-md border border-white/20">
+                          {ref.referral_code}
+                        </span>
+                        <span className="text-[10px] font-mono uppercase px-2.5 py-1 rounded-md bg-cyan-950/70 text-cyan-300 border border-cyan-800">
+                          Stepped Level {ref.stepped_care_level}
+                        </span>
+                        <span className="text-[10px] font-mono text-[#888]">
+                          Requested: {new Date(ref.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      <span className={`text-xs font-mono uppercase px-3 py-1 rounded-full border ${
+                        ref.status === 'completed'
+                          ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800'
+                          : ref.status === 'accepted' || ref.status === 'appointment_confirmed'
+                          ? 'bg-cyan-950/70 text-cyan-300 border-cyan-800'
+                          : 'bg-amber-950/70 text-amber-300 border-amber-800'
+                      }`}>
+                        Status: {ref.status.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-[#777] block text-[11px]">Provider / Specialist:</span>
+                        <strong className="text-white text-sm">{ref.provider_name}</strong>
+                        {ref.reason && <p className="text-xs text-[#aaa] mt-1">{ref.reason}</p>}
+                      </div>
+                      <div>
+                        <span className="text-[#777] block text-[11px]">Clinical Category:</span>
+                        <span className="text-white">{ref.clinical_category || 'Mental Wellbeing Coordination'}</span>
+                        {ref.clinical_notes && (
+                          <div className="mt-2 p-2.5 rounded-lg bg-black/40 border border-white/5 text-[#aaa]">
+                            <span className="text-[10px] uppercase font-mono text-[#777] block">Doctor / Coordinator Notes:</span>
+                            {ref.clinical_notes}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Closed-Loop Status & Confirmation Section */}
+                    <div className="pt-3 border-t border-[#202020] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        {ref.patient_confirmed_care ? (
+                          <div className="flex items-center space-x-2 text-emerald-300 text-xs font-mono">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            <span>Closed-Loop Complete: Care confirmed received by patient.</span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-amber-300/90 font-mono">
+                            Pending patient confirmation of care received.
+                          </span>
+                        )}
+                      </div>
+
+                      <div>
+                        {!ref.patient_confirmed_care && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setConfirmCareTarget(ref);
+                              setConfirmCareNotes('');
+                            }}
+                            className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] transition-all cursor-pointer shadow"
+                          >
+                            Confirm Care Received
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
         {/* TAB 5: MOOD & WELLBEING TRACKER                           */}
         {/* ========================================================= */}
         {activeTab === 'wellbeing' && (
@@ -982,6 +1601,67 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                 <span>Print Report</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 6. CLOSED-LOOP CARE CONFIRMATION MODAL */}
+      {confirmCareTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-[#0D0D0D] border border-white/20 rounded-2xl p-6 sm:p-8 space-y-5 shadow-2xl text-left">
+            <div className="flex items-center justify-between pb-3 border-b border-[#242424]">
+              <div>
+                <span className="text-[10px] font-mono uppercase text-cyan-400">Closed-Loop Verification</span>
+                <h3 className="text-lg font-bold text-white">Confirm Healthcare Received</h3>
+              </div>
+              <button
+                onClick={() => setConfirmCareTarget(null)}
+                className="text-xs text-[#888] hover:text-white font-mono cursor-pointer"
+              >
+                Close ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-[#bbb] leading-relaxed">
+              To ensure safety and continuous follow-up, please confirm if you attended your appointment or received care from <strong className="text-white">{confirmCareTarget.provider_name}</strong> ({confirmCareTarget.referral_code}).
+            </p>
+
+            <form onSubmit={handleConfirmCareSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#888] block">
+                  Your feedback or follow-up notes (Optional):
+                </label>
+                <textarea
+                  rows={3}
+                  value={confirmCareNotes}
+                  onChange={(e) => setConfirmCareNotes(e.target.value)}
+                  placeholder="e.g., Attended consultation, discussed care plan, felt well supported..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#141414] border border-[#2a2a2a] text-xs text-white placeholder-[#555] focus:outline-none focus:border-white transition-all resize-none"
+                />
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-800 text-[11px] text-emerald-200 flex items-center space-x-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Confirming care closes the coordination loop and records completion in your private health ledger.</span>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmCareTarget(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-mono text-[#888] hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={confirmCareLoading}
+                  className="px-5 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] cursor-pointer shadow transition-all"
+                >
+                  {confirmCareLoading ? 'Confirming...' : 'Yes, Confirm Care Received'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

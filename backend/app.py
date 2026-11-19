@@ -13,6 +13,7 @@ from routes.consultation_routes import consultation_bp
 from routes.emergency_routes import emergency_bp
 from routes.admin_routes import admin_bp
 from routes.health_block_routes import health_block_bp
+from routes.referral_routes import referral_bp
 
 def create_app():
     app = Flask(__name__)
@@ -72,6 +73,7 @@ def create_app():
     app.register_blueprint(emergency_bp, url_prefix='/api/emergency')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(health_block_bp, url_prefix='/api/health-blocks')
+    app.register_blueprint(referral_bp, url_prefix='/api/referrals')
 
     @app.route('/api/health', methods=['GET'])
     def health_check():

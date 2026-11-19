@@ -8,7 +8,8 @@ ai_bp = Blueprint('ai', __name__)
 
 CRISIS_PATTERNS = [
     r'\b(suicid|kill\s+myself|end\s+my\s+life|want\s+to\s+die|harm\s+myself|hanging\s+myself|overdose|cut\s+myself|end\s+it\s+all|can\'?t\s+go\s+on\s+anymore|better\s+off\s+dead)\b',
-    r'\b(no\s+reason\s+to\s+live|don\'?t\s+want\s+to\s+wake\s+up|ending\s+everything)\b'
+    r'\b(no\s+reason\s+to\s+live|don\'?t\s+want\s+to\s+wake\s+up|ending\s+everything)\b',
+    r'(انتحار|أموت|اذي\s+نفسي|انهي\s+حياتي|اريد\s+الموت|قتل\s+نفسي)'
 ]
 
 def detect_crisis(message: str) -> bool:
@@ -32,10 +33,10 @@ def generate_ai_reply(user_msg: str, user_name: str):
             ),
             'action': 'emergency_escalation',
             'crisis_contacts': [
+                {'name': '800-SAKINA Mental Health Hotline (Abu Dhabi)', 'number': '800 725462', 'badge': 'Toll-Free 24/7'},
                 {'name': 'UAE Emergency Police', 'number': '999', 'badge': 'Emergency'},
                 {'name': 'National Ambulance (UAE)', 'number': '998', 'badge': 'Medical SOS'},
                 {'name': 'DoH Estijaba Crisis Line (Abu Dhabi)', 'number': '800 1717', 'badge': 'Toll-Free 24/7'},
-                {'name': 'UAE National Mental Health Line', 'number': '800-4673', 'badge': 'Confidential Support'},
                 {'name': 'SEHA Healthcare Abu Dhabi', 'number': '800 50', 'badge': 'Hospital System'}
             ]
         }

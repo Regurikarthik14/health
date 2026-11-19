@@ -397,26 +397,52 @@ class Referral(db.Model):
     __tablename__ = 'referrals'
 
     id = db.Column(db.Integer, primary_key=True)
+    referral_code = db.Column(db.String(50), unique=True, nullable=True, index=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patients.id', ondelete='CASCADE'), nullable=False)
-    referring_doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id', ondelete='CASCADE'), nullable=False)
+    referring_doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id', ondelete='SET NULL'), nullable=True)
     referred_to_doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id', ondelete='SET NULL'), nullable=True)
+    stepped_care_level = db.Column(db.Integer, default=4)  # 1 to 5
+    provider_name = db.Column(db.String(150), nullable=True)
     specialization_needed = db.Column(db.String(100), nullable=False)
     urgency = db.Column(db.String(30), default='routine')  # 'routine', 'urgent', 'immediate'
     reason = db.Column(db.Text, nullable=False)
-    status = db.Column(db.String(30), default='pending')  # 'pending', 'accepted', 'completed'
+    patient_consent = db.Column(db.Boolean, default=True)
+    patient_confirmed_care = db.Column(db.Boolean, default=False)
+    patient_confirmation_notes = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(40), default='submitted')  # 'submitted', 'awaiting_review', 'accepted', 'appointment_requested', 'appointment_confirmed', 'follow_up_due', 'completed', 'alternative_support_required'
+    clinical_notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    # Relationships
+    patient = db.relationship('Patient', backref=db.backref('referrals', lazy='dynamic'))
+    referred_to_doctor = db.relationship('Doctor', foreign_keys=[referred_to_doctor_id], backref=db.backref('received_referrals', lazy='dynamic'))
+    referring_doctor = db.relationship('Doctor', foreign_keys=[referring_doctor_id], backref=db.backref('sent_referrals', lazy='dynamic'))
 
     def to_dict(self):
         return {
             'id': self.id,
+            'referral_code': self.referral_code or f"REF-2026-{self.id:04d}",
             'patient_id': self.patient_id,
+            'patient_name': self.patient.user.full_name if self.patient and self.patient.user else 'Patient',
+            'patient_email': self.patient.user.email if self.patient and self.patient.user else '',
+            'patient_phone': self.patient.user.phone if self.patient and self.patient.user else '',
             'referring_doctor_id': self.referring_doctor_id,
+            'referring_doctor_name': self.referring_doctor.user.full_name if self.referring_doctor and self.referring_doctor.user else 'Patient Self-Referral',
             'referred_to_doctor_id': self.referred_to_doctor_id,
+            'referred_to_doctor_name': self.referred_to_doctor.user.full_name if self.referred_to_doctor and self.referred_to_doctor.user else (self.provider_name or 'Specialist Provider'),
+            'stepped_care_level': self.stepped_care_level,
+            'provider_name': self.provider_name or (self.referred_to_doctor.clinic_name if self.referred_to_doctor else 'urCure Clinical Network'),
             'specialization_needed': self.specialization_needed,
             'urgency': self.urgency,
             'reason': self.reason,
+            'patient_consent': self.patient_consent,
+            'patient_confirmed_care': self.patient_confirmed_care,
+            'patient_confirmation_notes': self.patient_confirmation_notes,
             'status': self.status,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'clinical_notes': self.clinical_notes,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
 

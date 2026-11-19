@@ -372,3 +372,82 @@ def record_mood_checkin():
     db.session.commit()
 
     return jsonify({'message': 'Mood logged successfully.', 'assessment': assessment.to_dict()}), 201
+
+
+@assessment_bp.route('/early-warning', methods=['GET'])
+@jwt_required()
+def get_personal_early_warning():
+    """
+    Consent-based personal wellbeing early-warning engine.
+    Analyzes historical assessments against personal baseline.
+    Detects sustained changes in stress, anxiety, or sleep, presented in simple non-diagnostic English.
+    """
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+    if not user or not user.patient_profile:
+        return jsonify({
+            'has_alert': False,
+            'status': 'nominal',
+            'trend_direction': 'stable',
+            'message': 'No assessments available yet.'
+        }), 200
+
+    assessments = Assessment.query.filter_by(patient_id=user.patient_profile.id)\
+        .order_by(Assessment.completed_at.desc()).all()
+
+    if len(assessments) < 2:
+        return jsonify({
+            'has_alert': False,
+            'status': 'nominal',
+            'trend_direction': 'stable',
+            'message': 'Baseline is being established with your check-ins.',
+            'history_count': len(assessments)
+        }), 200
+
+    # Separate recent vs earlier baseline
+    recent = assessments[:3]
+    baseline = assessments[3:] if len(assessments) >= 4 else assessments[1:]
+
+    # Calculate normalized scores (0 to 100)
+    recent_pcts = [round((a.score / a.max_score) * 100, 1) for a in recent if a.max_score > 0]
+    baseline_pcts = [round((a.score / a.max_score) * 100, 1) for a in baseline if a.max_score > 0]
+
+    recent_avg = sum(recent_pcts) / len(recent_pcts) if recent_pcts else 0
+    baseline_avg = sum(baseline_pcts) / len(baseline_pcts) if baseline_pcts else 0
+    delta = recent_avg - baseline_avg
+
+    # Check for sustained stress or worry increases
+    has_alert = delta >= 15 or recent_avg >= 55
+    trend_direction = 'elevated_concern' if delta >= 15 else ('improving' if delta <= -10 else 'stable')
+
+    if delta >= 20:
+        headline = "Noticeable Increase in Stress or Worry"
+        message = "Your recent check-ins suggest that your stress and low energy have increased compared to your previous baseline. Would you like to explore gentle support options?"
+        recommended_level = 4  # Tele-mental health
+        suggested_action = "Schedule a 30-minute private chat with a licensed counselor."
+    elif delta >= 10 or recent_avg >= 50:
+        headline = "Slight Upward Trend in Tension"
+        message = "You have reported feeling more tired or on-edge over recent check-ins. Taking early mindful breaks can help you reset."
+        recommended_level = 1  # Self-help
+        suggested_action = "Try the 4-minute calm box breathing exercise or review sleep tips."
+    else:
+        headline = "Stable Emotional Balance"
+        message = "Your check-ins show steady, balanced emotional health consistent with your personal baseline."
+        recommended_level = 1
+        suggested_action = "Keep up your healthy daily sleep and activity habits."
+
+    return jsonify({
+        'has_alert': has_alert,
+        'status': 'alert' if has_alert else 'nominal',
+        'trend_direction': trend_direction,
+        'headline': headline,
+        'message': message,
+        'recommended_level': recommended_level,
+        'suggested_action': suggested_action,
+        'recent_average': round(recent_avg, 1),
+        'baseline_average': round(baseline_avg, 1),
+        'delta': round(delta, 1),
+        'history_count': len(assessments),
+        'disclaimer': 'This is a personal wellbeing decision-support insight, not an automated clinical diagnosis.'
+    }), 200
+

@@ -148,6 +148,8 @@ export const api = {
 
   getAssessmentHistory: () => fetchWithAuth('/assessments/history'),
 
+  getEarlyWarningStatus: () => fetchWithAuth('/assessments/early-warning'),
+
   recordMoodCheckin: (data: {
     mood_score: number;
     energy_score: number;
@@ -155,6 +157,51 @@ export const api = {
     note?: string;
   }) =>
     fetchWithAuth('/assessments/mood-checkin', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Closed-Loop Referrals & Care Coordination
+  createReferral: (data: {
+    stepped_care_level: number;
+    provider_name: string;
+    clinical_category?: string;
+    reason?: string;
+    latest_assessment_type?: string;
+    latest_score?: number;
+    latest_severity?: string;
+    patient_consent: boolean;
+  }) =>
+    fetchWithAuth('/referrals', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getMyReferrals: () => fetchWithAuth('/referrals/my'),
+
+  getDoctorReferrals: () => fetchWithAuth('/referrals/doctor'),
+
+  updateReferralStatus: (
+    referralId: number | string,
+    data: {
+      status: string;
+      notes?: string;
+      scheduled_date?: string;
+    }
+  ) =>
+    fetchWithAuth(`/referrals/${referralId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  confirmPatientCare: (
+    referralId: number | string,
+    data: {
+      confirmed: boolean;
+      notes?: string;
+    }
+  ) =>
+    fetchWithAuth(`/referrals/${referralId}/confirm-care`, {
       method: 'POST',
       body: JSON.stringify(data),
     }),

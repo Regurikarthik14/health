@@ -319,3 +319,44 @@ export interface HealthBlock {
   created_at: string;
   updated_at?: string;
 }
+
+export interface Referral {
+  id: number;
+  referral_code: string;
+  patient_id: number;
+  patient_name?: string;
+  patient_email?: string;
+  patient_phone?: string;
+  stepped_care_level: number;
+  provider_name: string;
+  clinical_category?: string;
+  reason?: string;
+  latest_assessment_type?: string;
+  latest_score?: number;
+  latest_severity?: string;
+  patient_consent: boolean;
+  status: 'submitted' | 'awaiting_review' | 'accepted' | 'appointment_requested' | 'appointment_confirmed' | 'follow_up_due' | 'completed' | 'alternative_support_required';
+  patient_confirmed_care: boolean;
+  patient_confirmation_notes?: string;
+  scheduled_date?: string;
+  clinical_notes?: string;
+  doctor_id?: number;
+  doctor_name?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface EarlyWarningStatus {
+  has_warning: boolean;
+  trigger_reason?: string;
+  trend_type?: string;
+  explanation: string;
+  suggested_action: string;
+  recommended_care_level: number;
+  baseline?: {
+    phq9_avg: number;
+    gad7_avg: number;
+    pss10_avg: number;
+    sleep_avg: number;
+  };
+}
