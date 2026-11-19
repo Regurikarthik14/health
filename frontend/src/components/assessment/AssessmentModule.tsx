@@ -504,7 +504,7 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({
                       </h4>
                     </div>
                     <p className="text-xs text-red-100/90 leading-relaxed">
-                      Your life and safety matter. You do not need to wait to finish this quiz. If you are having thoughts of hurting yourself, free, 100% confidential human support in Abu Dhabi and the UAE is available right now:
+                      Your life and safety matter. You do not need to wait to finish this check. If you are having thoughts of hurting yourself, free, 100% confidential human support in Abu Dhabi and the UAE is available right now:
                     </p>
                     <div className="flex flex-wrap items-center gap-2 pt-1">
                       <a

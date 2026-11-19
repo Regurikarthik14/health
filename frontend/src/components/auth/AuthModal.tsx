@@ -217,22 +217,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={() => { setTab('login'); setError(null); }}
-                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-                  tab === 'login'
+                className={`py-2 text-xs font-semibold rounded-lg transition-all ${tab === 'login'
                     ? 'bg-white text-black font-bold shadow-md'
                     : 'text-[#929292] hover:text-white'
-                }`}
+                  }`}
               >
                 Patient Sign In
               </button>
               <button
                 type="button"
                 onClick={() => { setTab('register_patient'); setError(null); }}
-                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-                  tab === 'register_patient'
+                className={`py-2 text-xs font-semibold rounded-lg transition-all ${tab === 'register_patient'
                     ? 'bg-white text-black font-bold shadow-md'
                     : 'text-[#929292] hover:text-white'
-                }`}
+                  }`}
               >
                 Create Patient Account
               </button>
@@ -242,22 +240,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={() => { setTab('login'); setError(null); }}
-                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-                  tab === 'login'
+                className={`py-2 text-xs font-semibold rounded-lg transition-all ${tab === 'login'
                     ? 'bg-white text-black font-bold shadow-md'
                     : 'text-[#929292] hover:text-white'
-                }`}
+                  }`}
               >
                 Doctor Sign In
               </button>
               <button
                 type="button"
                 onClick={() => { setTab('register_doctor'); setError(null); }}
-                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-                  tab === 'register_doctor'
+                className={`py-2 text-xs font-semibold rounded-lg transition-all ${tab === 'register_doctor'
                     ? 'bg-white text-black font-bold shadow-md'
                     : 'text-[#929292] hover:text-white'
-                }`}
+                  }`}
               >
                 Apply as a Doctor
               </button>

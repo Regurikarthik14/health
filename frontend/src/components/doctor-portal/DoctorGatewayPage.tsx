@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  ShieldCheck, 
-  Stethoscope, 
-  Lock, 
-  Mail, 
-  Phone, 
-  Building, 
-  Award, 
-  FileText, 
-  ArrowRight, 
-  CheckCircle, 
+import {
+  ShieldCheck,
+  Stethoscope,
+  Lock,
+  Mail,
+  Phone,
+  Building,
+  Award,
+  FileText,
+  ArrowRight,
+  CheckCircle,
   AlertCircle,
   Video,
   MapPin,
@@ -155,12 +155,12 @@ export const DoctorGatewayPage: React.FC<DoctorGatewayPageProps> = ({ onNavigate
 
   return (
     <div className="min-h-screen bg-[#050505] text-[#F5F5F5] flex flex-col font-sans selection:bg-white/20 selection:text-white">
-      
+
       {/* Top Header of Private Doctor Portal */}
       <header className="sticky top-0 z-40 w-full bg-[#050505]/95 backdrop-blur-2xl border-b border-[#1c1c1c]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            
+
             <div className="flex items-center space-x-3">
               <UrCureLogo size="md" onClick={onNavigateHome} />
               <div className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-mono uppercase tracking-wider text-white">
@@ -185,7 +185,7 @@ export const DoctorGatewayPage: React.FC<DoctorGatewayPageProps> = ({ onNavigate
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-        
+
         {/* Security / Isolation Banner */}
         <div className="mb-8 p-4 rounded-xl bg-[#0c0c0c] border border-white/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
@@ -205,7 +205,7 @@ export const DoctorGatewayPage: React.FC<DoctorGatewayPageProps> = ({ onNavigate
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* Left Column: Doctor Benefits & Strict Regulatory Protocol */}
           <div className="lg:col-span-6 space-y-6 text-left">
             <div>
@@ -216,7 +216,7 @@ export const DoctorGatewayPage: React.FC<DoctorGatewayPageProps> = ({ onNavigate
                 urCure Doctor Portal
               </h1>
               <p className="text-sm text-[#929292] mt-2 leading-relaxed">
-                Connect directly with patients for 30-minute private telehealth or clinic visits. 
+                Connect directly with patients for 30-minute private telehealth or clinic visits.
                 Manage your schedule, conduct high-definition video calls, and document confidential clinical notes.
               </p>
             </div>
@@ -277,26 +277,24 @@ export const DoctorGatewayPage: React.FC<DoctorGatewayPageProps> = ({ onNavigate
           {/* Right Column: Dedicated Doctor Auth Box */}
           <div className="lg:col-span-6">
             <div className="p-6 sm:p-8 rounded-2xl bg-[#0C0C0C] border border-[#282828] shadow-2xl text-left">
-              
+
               {/* Tab Selector */}
               <div className="flex border-b border-[#222] mb-6">
                 <button
                   onClick={() => { setTab('signin'); setError(null); }}
-                  className={`pb-3 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer mr-6 ${
-                    tab === 'signin'
-                      ? 'text-white border-b-2 border-white'
-                      : 'text-[#666] hover:text-[#AAA]'
-                  }`}
+                  className={`pb-3 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer mr-6 ${tab === 'signin'
+                    ? 'text-white border-b-2 border-white'
+                    : 'text-[#666] hover:text-[#AAA]'
+                    }`}
                 >
                   Doctor Sign In
                 </button>
                 <button
                   onClick={() => { setTab('register'); setError(null); }}
-                  className={`pb-3 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
-                    tab === 'register'
-                      ? 'text-white border-b-2 border-white'
-                      : 'text-[#666] hover:text-[#AAA]'
-                  }`}
+                  className={`pb-3 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${tab === 'register'
+                    ? 'text-white border-b-2 border-white'
+                    : 'text-[#666] hover:text-[#AAA]'
+                    }`}
                 >
                   Apply to Join Network
                 </button>
@@ -318,7 +316,7 @@ export const DoctorGatewayPage: React.FC<DoctorGatewayPageProps> = ({ onNavigate
                   </div>
                   <h3 className="text-lg font-bold text-white">Doctor Application Submitted</h3>
                   <p className="text-xs text-[#999999] leading-relaxed max-w-md mx-auto">
-                    Thank you, <strong className="text-white">{dName}</strong>. Your medical credentials (License <span className="font-mono text-white">{dLicense}</span>) have been received. 
+                    Thank you, <strong className="text-white">{dName}</strong>. Your medical credentials (License <span className="font-mono text-white">{dLicense}</span>) have been received.
                     Our medical administrator will verify your license with health authorities.
                   </p>
                   <div className="p-3 rounded-xl bg-black border border-[#222] text-[11px] font-mono text-[#AAA]">
