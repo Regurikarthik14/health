@@ -272,3 +272,4 @@ class MongoService:
 
 # Global singleton
 mongo_service = MongoService()
+

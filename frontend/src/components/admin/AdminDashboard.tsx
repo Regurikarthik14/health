@@ -12,7 +12,8 @@ import {
   Search,
   Lock,
   Eye,
-  Server
+  Server,
+  ExternalLink
 } from 'lucide-react';
 import { api } from '../../services/api';
 import type { Doctor, Appointment, CrisisEvent, AuditLog } from '../../types';
@@ -127,21 +128,35 @@ export const AdminDashboard: React.FC = () => {
           <p className="text-xs text-[#888888] leading-relaxed max-w-2xl">
             Provide this separate link <strong className="text-white">only to licensed doctors</strong> to apply or sign in. The public website remains strictly for patients with zero doctor registration visibility.
           </p>
-          <div className="text-xs font-mono text-white bg-black px-3 py-1.5 rounded-lg border border-[#252525] inline-flex items-center space-x-2">
-            <span>{typeof window !== 'undefined' ? `${window.location.origin}/doctor` : 'http://localhost:5173/doctor'}</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="text-xs font-mono text-white bg-black px-3 py-1.5 rounded-lg border border-[#252525] inline-flex items-center space-x-2">
+              <span>{typeof window !== 'undefined' ? `${window.location.origin}/doctor` : 'http://localhost:5173/doctor'}</span>
+            </div>
+            <span className="text-[11px] text-[#666] font-mono">or {typeof window !== 'undefined' ? `${window.location.origin}/#/doctor` : '/#/doctor'}</span>
           </div>
         </div>
-        <button
-          onClick={() => {
-            const url = `${window.location.origin}/doctor`;
-            navigator.clipboard.writeText(url);
-            alert(`Private Doctor Link copied to clipboard:\n${url}\n\nSend this link only to authorized medical doctors.`);
-          }}
-          className="px-4 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] cursor-pointer transition-all flex items-center space-x-1.5 shrink-0 shadow-lg"
-        >
-          <Check className="w-3.5 h-3.5 text-black" />
-          <span>Copy Doctor Link</span>
-        </button>
+        <div className="flex items-center space-x-2 shrink-0">
+          <a
+            href={typeof window !== 'undefined' ? `${window.location.origin}/doctor` : '/doctor'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all flex items-center space-x-1.5 cursor-pointer"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Open in New Tab</span>
+          </a>
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/doctor`;
+              navigator.clipboard.writeText(url);
+              alert(`Private Doctor Link copied to clipboard:\n${url}\n\nSend this link only to authorized medical doctors.`);
+            }}
+            className="px-4 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#EAEAEA] cursor-pointer transition-all flex items-center space-x-1.5 shadow-lg"
+          >
+            <Check className="w-3.5 h-3.5 text-black" />
+            <span>Copy Link</span>
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}

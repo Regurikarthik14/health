@@ -4,7 +4,8 @@ import {
   User as UserIcon, 
   LogOut, 
   ChevronDown,
-  LayoutDashboard
+  LayoutDashboard,
+  Stethoscope
 } from 'lucide-react';
 import { UrCureLogo } from './common/UrCureLogo';
 
@@ -117,6 +118,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             ) : (
               <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => onNavigate('doctor-gateway')}
+                  className="hidden sm:flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-medium text-[#A0A0A0] hover:text-white bg-transparent hover:bg-white/[0.06] border border-transparent hover:border-white/20 transition-all cursor-pointer"
+                  title="Doctor & Clinical Staff Portal"
+                >
+                  <Stethoscope className="w-3.5 h-3.5" />
+                  <span>Doctor Portal</span>
+                </button>
                 <button
                   onClick={() => onOpenAuth('login', 'patient')}
                   className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[#111111] border border-[#2a2a2a] hover:border-white/50 hover:bg-white/[0.08] transition-all cursor-pointer shadow-sm"
